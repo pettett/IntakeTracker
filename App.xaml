@@ -1,0 +1,44 @@
+﻿<Application x:Class="IntakeTrackerApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:IntakeTrackerApp"
+             xmlns:controls="clr-namespace:IntakeTrackerApp.Controls"
+             StartupUri="/Windows/MainWindow.xaml"
+            >
+    <Application.Resources>
+
+        <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
+
+        <Style TargetType="controls:CollapsibleGroupControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:CollapsibleGroupControl">
+                        <GroupBox>
+                            <GroupBox.Header>
+                                <StackPanel Orientation="Horizontal" Margin="8">
+
+                                    <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <Run Text="{TemplateBinding Header}"/>
+					                <Run Text="Needed:"/>
+                                    </TextBlock>
+
+                                    <ComboBox HorizontalAlignment="Left" 
+                                              SelectedValue="{Binding Enabled, RelativeSource={RelativeSource TemplatedParent}}" 
+                                              ItemsSource="{x:Static controls:CollapsibleGroupControl.IsNeededOptions}" SelectedValuePath="Key" 
+                                              DisplayMemberPath="Value"/>
+
+                                </StackPanel>
+                            </GroupBox.Header>
+
+                            <Grid Visibility="{Binding Enabled, RelativeSource={RelativeSource TemplatedParent} , Converter={StaticResource cBoolToVis}, NotifyOnSourceUpdated=True}"  >
+
+                                <ContentControl HorizontalContentAlignment="Stretch" Content="{TemplateBinding Content}"/>
+
+                            </Grid>
+                        </GroupBox>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
+</Application>

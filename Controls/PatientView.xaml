@@ -1,0 +1,318 @@
+﻿<UserControl x:Class="IntakeTrackerApp.Controls.PatientView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:IntakeTrackerApp.Controls" 
+             mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800" 
+	xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf">
+
+    <UserControl.Resources>
+        <local:OrientationConverter x:Key="OrientationConverter" />
+        <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" Padding="2">
+
+        <StackPanel x:Name="ReferralStack" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PatientView}}}">
+            <!-- Details and referral information-->
+            <DockPanel>
+                <StackPanel>
+
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="Name: {0} {1}">
+                                <Binding Path="Referral.FirstName"/>
+                                <Binding Path="Referral.LastName"/>
+                            </MultiBinding>
+
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                    <TextBlock >
+                        <TextBlock.Text>
+                            <MultiBinding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="Age: {0} (D.O.B.: {1:d})">
+                                <Binding Path="Referral.Age"/>
+                                <Binding Path="Referral.DateOfBirth"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Visibility="{Binding Referral.IsNotTransfer, Converter={StaticResource cBoolToVis} }">
+                        <TextBlock.Text>
+                            <Binding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="Referral: {0}" Path="Referral.ReferralType"/>
+
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                    <TextBlock Visibility="{Binding Referral.IsTransfer, Converter={StaticResource cBoolToVis} }">
+                        <TextBlock.Text>
+                            <Binding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="Transfered From: {0}" Path="Referral.TransferRegion"/>
+
+                        </TextBlock.Text>
+                    </TextBlock>
+
+
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <Binding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="Hospital #: {0}" Path="Referral.HospitalNumber"/>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <Binding NotifyOnSourceUpdated="True" 
+                                      ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
+                                      StringFormat="NHS #: {0}" Path="Referral.NHSNumber"/>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+
+                    <CheckBox  IsChecked="{Binding Archived, NotifyOnSourceUpdated=True}" 
+                              Content="Archive" />
+                </StackPanel>
+
+
+
+                <Button x:Name="EditPatientDetailsButton"
+                        Margin="8" Height="20" Width="20" VerticalAlignment="Top"
+                        Click="EditPatientDetailsButton_Click">
+
+                    <Image Source="/Images/Edit_grey_16x.png" Width="16" Height="16"/>
+                </Button>
+
+                <TextBlock DockPanel.Dock="Top">Brief Details:</TextBlock>
+                <TextBox TextWrapping="Wrap" 
+                         Text="{Binding Referral.BriefDetails,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                         AcceptsReturn="True"  />
+
+            </DockPanel >
+
+
+            <!-- Referral management center-->
+            <GroupBox Header="Active Referral">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition MinWidth="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="4,4,8,4" Grid.Row="0" Grid.Column="0">
+                        Date Of Active Referral Management
+                    </TextBlock>
+                    <local:TodayDateControl x:Name="ActiveReferralManagementDateControl" 
+                                            SelectedDate="{Binding Referral.DateOfActiveManagement.Date ,NotifyOnSourceUpdated=True}"
+                                            Grid.Row="0" Grid.Column="1" Margin="0,0,0,4" />
+
+                    <TextBlock Margin="4,4,8,4" Grid.Row="1" Grid.Column="0">
+                        Referral Manager
+                    </TextBlock>
+                    <ComboBox Grid.Row="1" Grid.Column="1" IsEditable="True" 
+                              Text="{Binding Referral.ResponsibleOfActiveManagement, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                              ItemsSource="{Binding Managers}" Margin="0,0,0,4" />
+
+                    <TextBlock Margin="4,4,8,4" Grid.Row="2" Grid.Column="0">
+                        Referral Management/Actions
+                    </TextBlock>
+
+                    <TextBox Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" Grid.ColumnSpan="2" AcceptsReturn="True" 
+                             Text="{Binding Referral.ActiveReferralActions,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Visualization Area -->
+            <GroupBox Header="Visualization" Height="300">
+                <lvc:CartesianChart LegendLocation="Left" 
+                DataClick = "OnEventClicked" DisableAnimations="True" Series="{Binding ReferralsEventsCollection}">
+
+
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis  x:Name="YAxis" Unit="1" MinValue="0" MaxValue="4"  LabelFormatter="{Binding EventCatagoryFormatter}"/>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis x:Name="XAxis" LabelFormatter="{Binding DateTimeFormatter}" />
+
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.DataTooltip>
+                        <local:EventChartTooltip/>
+                    </lvc:CartesianChart.DataTooltip>
+                </lvc:CartesianChart>
+            </GroupBox>
+
+            <!-- Patient Contact Input-->
+            <GroupBox Header="Patient Contact">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <!-- Dummy column to give spacing to controls -->
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="4,4,8,4" Grid.Row="0">Preferred Contact Method:</TextBlock>
+                    <TextBox Grid.Column="1" Margin="4" 
+                             Text="{Binding Referral.PreferredContactMethod,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+
+
+                    <TextBlock x:Name="ContactAttempted" Margin="4,4,8,4" Grid.Row="1">Contact Attempted:</TextBlock>
+                    <local:DateRecordControl Grid.Row="1"  SelectedDate="{Binding Referral.ContactAttempted.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.ContactAttempted.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4" 
+                                            Grid.Column="1"/>
+
+
+                    <TextBlock Margin="4,4,8,4" Grid.Row="2">Contact Made:</TextBlock>
+                    <local:DateRecordControl SelectedDate="{Binding Referral.DateContactMade.Date,NotifyOnSourceUpdated=True}" 
+                                             Comment="{Binding Referral.DateContactMade.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4" Grid.Row="2" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+
+
+
+            <!-- Previous correspondence Input-->
+            <local:CollapsibleGroupControl  Header="Previous Correspondence" 
+                                            Enabled="{Binding Referral.PreviousCorrespondenceNeeded,NotifyOnSourceUpdated=True}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*" MinWidth="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+
+                    <TextBlock  Margin="4,4,8,4" Grid.Row="0">Previous Correspondence Requested:</TextBlock>
+
+                    <local:DateRecordControl  x:Name="CorrespondenceRequested"
+                                              SelectedDate="{Binding Referral.PreviousCorrespondenceRequested.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.PreviousCorrespondenceRequested.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="8,4,4,4" Grid.Row="0" Grid.Column="1"/>
+
+                    <TextBlock Margin="4,4,8,4" Grid.Row="1">Previous Correspondence Received:</TextBlock>
+
+                    <local:DateRecordControl SelectedDate="{Binding Referral.PreviousCorrespondenceReceived.Date,NotifyOnSourceUpdated=True}" 
+                                             Comment="{Binding Referral.PreviousCorrespondenceReceived.Comment,NotifyOnSourceUpdated=True}" 
+                                             Margin="8,4,4,4" Grid.Row="1" Grid.Column="1"/>
+
+                    <TextBlock Margin="4" Grid.Row="0" Grid.Column="2">Correspondence Summary</TextBlock>
+                    <TextBox  AcceptsReturn="True" 
+                              Text="{Binding Referral.PreviousCorrespondenceSummary,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                             Margin="4,30,4,4" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" TextWrapping="Wrap"/>
+
+                </Grid>
+            </local:CollapsibleGroupControl>
+
+
+            <!--Standard Tests-->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <local:TestControl Grid.Column="0" x:Name="MRI" Test="{Binding Referral.MRI}"/>
+
+                <local:TestControl  Grid.Column="1"  x:Name="LP"  Margin="8,0,8,0" Test="{Binding Referral.LP}"/>
+
+                <local:TestControl Grid.Column="2" x:Name="EP" Test="{Binding Referral.EP}"/>
+            </Grid>
+
+            <!-- Blood test data input-->
+            <local:CollapsibleGroupControl Header="Bloods" 
+                                           Enabled="{Binding Referral.BloodTestNeeded,NotifyOnSourceUpdated=True}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Margin="4,4,4,4" Grid.Row="0">Blood Forms Sent</TextBlock>
+                    <local:DateRecordControl MaxWidth="200" 
+                                             SelectedDate="{Binding Referral.BloodFormsSent.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.BloodFormsSent.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4,4,4,4" Grid.Row="0" Grid.Column="1"/>
+
+                    <TextBlock Margin="4,4,4,4" Grid.Row="1">Bloods Planned</TextBlock>
+                    <local:DateRecordControl MaxWidth="200" 
+                                             SelectedDate="{Binding Referral.BloodTestPlanned.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.BloodTestPlanned.Comment,NotifyOnSourceUpdated=True}" 
+                                             Margin="4,4,4,4" Grid.Row="1" Grid.Column="1"/>
+
+                    <TextBlock Margin="4,4,4,4" Grid.Row="2">Blood Reported</TextBlock>
+                    <local:DateRecordControl MaxWidth="200" 
+                                             SelectedDate="{Binding Referral.BloodTestReported.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.BloodTestReported.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4,4,4,4" Grid.Row="2" Grid.Column="1"/>
+
+                    <TextBlock Margin="4,4,4,4" Grid.Row="0" Grid.Column="2">Blood Results</TextBlock>
+                    <TextBox AcceptsReturn="True" Text="{Binding Referral.BloodTestResults,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                             Margin="4,4,4,4" Grid.Row="0" Grid.RowSpan="4" Grid.Column="3" TextWrapping="Wrap"/>
+                </Grid>
+            </local:CollapsibleGroupControl>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <local:CollapsibleGroupControl Header="Nursing Appointment" 
+                                               Enabled="{Binding Referral.NursingAppointmentNeeded,NotifyOnSourceUpdated=True}">
+
+
+                    <local:DateRecordControl  HorizontalAlignment="Stretch"
+                                             SelectedDate="{Binding Referral.NursingAppointment.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.NursingAppointment.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4"/>
+
+                </local:CollapsibleGroupControl>
+
+
+                <local:CollapsibleGroupControl Grid.Column="1" Header="Medical Appointment" 
+                                               Enabled="{Binding Referral.MedicalAppointmentNeeded,NotifyOnSourceUpdated=True}">
+
+
+                    <local:DateRecordControl  HorizontalAlignment="Stretch"
+                                             SelectedDate="{Binding Referral.MedicalAppointment.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.MedicalAppointment.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4"/>
+
+                </local:CollapsibleGroupControl>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

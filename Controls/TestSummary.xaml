@@ -1,0 +1,209 @@
+﻿<UserControl x:Class="IntakeTrackerApp.Controls.TestSummary"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:IntakeTrackerApp.Controls"
+             xmlns:extensions="clr-namespace:IntakeTrackerApp.Extensions"
+             mc:Ignorable="d" 
+          
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="HoverUnderlineStyle">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="heading" TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+
+        <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:TestSummary},  NotifyOnSourceUpdated=True}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!-- Patient waiting display-->
+            <GroupBox Header="Current Activity">
+
+                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="GlobalInfomation" ItemsSource="{Binding AllAwaitedEvents, NotifyOnSourceUpdated=True}" >
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <Separator/>
+                                        <TextBlock Cursor="Hand" Style="{StaticResource HoverUnderlineStyle}" Text="{Binding Name.Name}" >
+                                            <TextBlock.InputBindings>
+                                                <MouseBinding Command="{Binding Name}" MouseAction="LeftClick" />
+                                            </TextBlock.InputBindings>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                    
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="Background" Value="Transparent" />
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border
+                         BorderBrush="Transparent"
+                         BorderThickness="0"
+                         Background="{TemplateBinding Background}">
+                                            <GridViewRowPresenter HorizontalAlignment="Stretch" 
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" 
+                                                                  Margin="0" Content="{TemplateBinding Content}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.View>
+                        <GridView>
+
+                            <GridViewColumn DisplayMemberBinding="{Binding Display}" >
+                                <GridViewColumnHeader>Event</GridViewColumnHeader>
+
+                            </GridViewColumn>
+
+
+                            <GridViewColumn >
+                                <GridViewColumnHeader>Waiting</GridViewColumnHeader>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+
+                                        <TextBlock >
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}{0} {1}">
+                                                    <Binding Path="WaitingTime"/>
+                                                    <Binding Path="DaysLabel"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            
+                            <GridViewColumn>
+                                <GridViewColumnHeader>Comment</GridViewColumnHeader>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+
+                                        <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" />
+
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+
+
+            </GroupBox>
+            <StackPanel Grid.Column="1" Height="auto">
+
+
+                <!-- Referral Types Graph-->
+                <GroupBox Header="Referral Types">
+                    <StackPanel>
+
+                        <lvc:CartesianChart Height="200" DisableAnimations="True" Series="{Binding ReferralCatagoriesCollection}">
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Unit="1" MinValue="0" x:Name="ReferralCatagoriesAxisY"  Title="Count"/>
+                            </lvc:CartesianChart.AxisY>
+
+                            <lvc:CartesianChart.AxisX>
+
+                                <lvc:Axis LabelsRotation="20"  x:Name="ReferralCatagoriesAxisX"  Title="Referral Type"
+                                          Labels="{Binding ReferralTypes}" >
+
+                                    <lvc:Axis.Separator >
+                                        <lvc:Separator IsEnabled="False" Step="1"></lvc:Separator>
+                                    </lvc:Axis.Separator>
+
+                                </lvc:Axis>
+
+                            </lvc:CartesianChart.AxisX>
+                        </lvc:CartesianChart>
+                        <TextBlock Text="{Binding GlobalOne}"/>
+                    </StackPanel>
+                </GroupBox>
+                <!-- Referrals over time graph-->
+                <GroupBox Header="Incoming Referrals over Time">
+                    <StackPanel>
+
+
+                        <lvc:CartesianChart DataClick = "OnReferralPointClicked"  Height="200" DisableAnimations="True" 
+                                            Series="{Binding ReferralsOverTimeCollection}">
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Unit="1" MinValue="0" Title="Count"/>
+                            </lvc:CartesianChart.AxisY>
+
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis  x:Name="ReferralsOverTimeAxisX" Title="Time" LabelFormatter="{Binding DateTimeFormatter}"/>
+                            </lvc:CartesianChart.AxisX>
+
+
+                            <lvc:CartesianChart.DataTooltip>
+                                <local:ReferralPointTooltip/>
+                            </lvc:CartesianChart.DataTooltip>
+
+                        </lvc:CartesianChart>
+                    </StackPanel>
+                </GroupBox>
+                <!-- Waiting time histogram -->
+                <GroupBox Header="Waiting Times">
+                    <StackPanel>
+
+
+                        <lvc:CartesianChart Height="200" DisableAnimations="True" Series="{Binding WaitingTimeCollection}">
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis  Title="Count"  MinValue="0" Unit="1"/>
+                            </lvc:CartesianChart.AxisY>
+
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis x:Name="WaitingTimeAxisX" Title="Waiting Time (Days)" MinValue="0"/>
+                            </lvc:CartesianChart.AxisX>
+
+                        </lvc:CartesianChart>
+
+                        <TextBlock Text="{Binding WaitingTimeInfo}"/>
+                    </StackPanel>
+
+                </GroupBox>
+
+            </StackPanel>
+        </Grid>
+
+    </ScrollViewer>
+
+
+</UserControl>

@@ -1,0 +1,44 @@
+﻿<Window x:Class="IntakeTrackerApp.Windows.ImportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IntakeTrackerApp.Windows"
+        mc:Ignorable="d"
+        Title="ImportWindow" Height="450" Width="800">
+    <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:ImportWindow}}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.ColumnSpan="2">
+
+            <TextBlock >
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="Ready to import {0} Referrals ({1} Duplicate(s))">
+                        <Binding Path="ImportCount"/>
+                        <Binding Path="DuplicateCount"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <!--  <CheckBox Content="Override Duplicates" IsChecked="{Binding OverrideDuplicates}"/>-->
+            <CheckBox Content="Import Archived" IsChecked="{Binding ImportArchive}"/>
+            <CheckBox Content="Un-Archive imported referrals"
+                      IsEnabled="{Binding ImportArchive}" IsChecked="{Binding UnArchiveImported}"/>
+
+        </StackPanel>
+
+        <Button Grid.Row="1" Click="CancelButton_Clicked"  x:Name="Cancel" Margin="4">
+            Cancel
+        </Button>
+        <Button Grid.Row="1" Grid.Column="1" IsDefault="True" Click="SubmitButton_Clicked" x:Name="Submit" Margin="4">
+            Import
+        </Button>
+    </Grid>
+</Window>
