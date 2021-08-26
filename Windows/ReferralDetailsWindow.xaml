@@ -35,7 +35,7 @@
         </ControlTemplate>
     </Window.Resources>
 
-    <StackPanel x:Name="ReferralDetailsPanel" Margin="12,12,12,12">
+    <StackPanel DataContext="{Binding viewModel}" x:Name="ReferralDetailsPanel" Margin="12,12,12,12">
         <TextBlock TextWrapping="Wrap">Enter Referral Details:</TextBlock>
         <Grid >
 

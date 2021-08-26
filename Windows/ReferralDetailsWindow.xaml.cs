@@ -4,270 +4,267 @@ using System.Text.RegularExpressions;
 
 namespace IntakeTrackerApp;
 
+
 /// <summary>
 /// Interaction logic for NewPatientReferralWindow.xaml
 /// </summary>
-public partial class ReferralDetailsWindow : Window, INotifyPropertyChanged, INotifyDataErrorInfo
+public partial class ReferralDetailsWindow : Window
 {
-    ErrorTracker errorTracker;
-    public ReferralDetailsWindow()
-    {
-        errorTracker = new(OnErrorsChanged);
-        InitializeComponent();
-        Windows.WindowUtility.HideMinimizeAndMaximizeButtons(this);
-    }
+	public ReferralDetailsViewModel viewModel { get; set; } = new();
+	public ReferralDetailsWindow()
+	{
+		InitializeComponent();
+		Windows.WindowUtility.HideMinimizeAndMaximizeButtons(this);
+	}
 
-    public ReferralDetailsWindow(
-        PatientReferral referral) : this()
-    {
-        HospitalNumber = referral.HospitalNumber.ToString();
-        ReferralType = referral.ReferralType;
-        FirstName = referral.FirstName;
-        LastName = referral.LastName;
-        DateOfBirth = referral.DateOfBirth;
-        DateOnReferral = referral.DateOnReferral;
-        DateReferralRecieved = referral.DateReferralReceived;
-        NHSNumber = referral.NHSNumber;
-        TransferRegion = referral.TransferRegion;
+	public ReferralDetailsWindow(
+		PatientReferral referral)
+	{
+		viewModel.HospitalNumber = referral.LocalHospitalNumber;
+		viewModel.ReferralType = referral.ReferralType;
+		viewModel.FirstName = referral.FirstName;
+		viewModel.LastName = referral.LastName;
+		viewModel.DateOfBirth = referral.DateOfBirth;
+		viewModel.DateOnReferral = referral.DateOnReferral;
+		viewModel.DateReferralRecieved = referral.DateReferralReceived;
+		viewModel.NHSNumber = referral.NHSNumberKey.ToString("000 000 0000");
+		viewModel.TransferRegion = referral.TransferRegion;
 
-        ValidateAll((Variable)(-1));
-    }
-    /// <summary>
-    /// Applies every value EXECPT hospital number which is a key so must be done separately
-    /// </summary>
-    /// <param name="referral"></param>
-    public void ApplyDateToReferral(PatientReferral referral)
-    {
-        //  referral.HospitalNumber = ulong.Parse(HospitalNumber);
+		InitializeComponent();
+		Windows.WindowUtility.HideMinimizeAndMaximizeButtons(this);
 
-        referral.FirstName = FirstName;
-        referral.LastName = LastName;
-        referral.DateOfBirth = DateOfBirth!.Value;
-        referral.DateOnReferral = DateOnReferral!.Value;
-        referral.DateReferralReceived = DateReferralRecieved!.Value;
-        referral.ReferralType = ReferralType;
-        referral.NHSNumber = NHSNumber;
+		viewModel.ValidateAll();
+	}
+	/// <summary>
+	/// Applies every value EXECPT hospital number which is a key so must be done separately
+	/// </summary>
+	/// <param name="referral"></param>
+	public void ApplyDateToReferral(PatientReferral referral)
+	{
+		//  referral.HospitalNumber = ulong.Parse(HospitalNumber);
 
-        referral.TransferRegion = ShowTransferRegion ? TransferRegion : null;
-    }
-    private void okButton_Click(object sender, RoutedEventArgs e)
-    {
-        ValidateAll((Variable)(-1));
+		referral.FirstName = viewModel.FirstName;
+		referral.LastName = viewModel.LastName;
+		referral.DateOfBirth = viewModel.DateOfBirth!.Value;
+		referral.DateOnReferral = viewModel.DateOnReferral!.Value;
+		referral.DateReferralReceived = viewModel.DateReferralRecieved!.Value;
+		referral.ReferralType = viewModel.ReferralType;
+		referral.LocalHospitalNumber = viewModel.HospitalNumber;
 
-        if (HasErrors)
-        {
-            errorTracker.LogErrors();
-            return;
-        }
+		referral.TransferRegion = viewModel.ShowTransferRegion ? viewModel.TransferRegion : null;
+	}
+	private void okButton_Click(object sender, RoutedEventArgs e)
+	{
+		viewModel.ValidateAll();
 
-        DialogResult = true;
-    }
+		if (!viewModel.HasErrors)
+		{
+			DialogResult = true;
+		}
 
-    private void cancelButton_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+	}
 
-
-    void OnErrorsChanged(object? obj, DataErrorsChangedEventArgs args) => ErrorsChanged?.Invoke(obj, args);
-
-    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-
-    [Flags]
-    public enum Variable
-    {
-        HopNum = 0b0000_0001,
-        FirstName = 0b0000_0010,
-        LastName = 0b0000_0100,
-        DOB = 0b0000_1000,
-        DOR = 0b0001_0000,
-        DRR = 0b0010_0000,
-        ReferralType = 0b0100_0000,
-        NHSNumber = 0b1000_0000,
-
-    }
-    string hospitalNumber = "";
-    //Every field needs a containing property with get and set for WPF to bind to it
-    //Set command notifies other controls of the change and validates every variable
-    //That is related to this control
-    public string HospitalNumber
-    {
-        get => hospitalNumber; set
-        {
-            hospitalNumber = value;
-            ValidateAll(Variable.HopNum);
-            NotifyPropertyChanged();
-        }
-    }
-
-    private string referralType = "";
-    public string ReferralType
-    {
-        get => referralType; set
-        {
-            referralType = value;
-            ValidateAll(Variable.ReferralType);
-            NotifyPropertyChanged();
-        }
-    }
-
-    private string nhsNumber = "";
-    public string NHSNumber
-    {
-        get => nhsNumber; set
-        {
-            nhsNumber = value;
-            ValidateAll(Variable.NHSNumber);
-            NotifyPropertyChanged();
-        }
-    }
-
-
-    string firstName = "";
-    public string FirstName
-    {
-        get => firstName; set
-        {
-            firstName = value;
-            ValidateAll(Variable.FirstName);
-            NotifyPropertyChanged();
-        }
-    }
-
-    string lastName = "";
-    public string LastName
-    {
-        get => lastName; set
-        {
-            lastName = value;
-            ValidateAll(Variable.LastName);
-            NotifyPropertyChanged();
-        }
-    }
-
-    string? transferRegion;
-    public string? TransferRegion
-    {
-        get => transferRegion; set
-        {
-            transferRegion = value;
-            NotifyPropertyChanged();
-        }
-    }
+	private void cancelButton_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
 
 
-    DateTime? dateOfBirth;
-
-    public DateTime? DateOfBirth
-    {
-        get => dateOfBirth; set
-        {
-
-            dateOfBirth = value;
-            ValidateAll(Variable.DOB);
-            NotifyPropertyChanged();
-        }
-    }
-    DateTime? dateOnReferral;
-
-    public DateTime? DateOnReferral
-    {
-        get => dateOnReferral; set
-        {
-            dateOnReferral = value;
-            ValidateAll(Variable.DOR);
-            NotifyPropertyChanged();
-        }
-    }
-    DateTime? dateReferralRecieved;
-
-    public DateTime? DateReferralRecieved
-    {
-        get => dateReferralRecieved; set
-        {
-            dateReferralRecieved = value;
-            ValidateAll(Variable.DRR);
-            NotifyPropertyChanged();
-        }
-    }
-    ///<summary>
-    ///Validate all variables related to the variables changed
-    /// </summary>
-    public void ValidateAll(Variable changed)
-    {
-        Debug.WriteLine("Validating");
-        if (changed.HasFlag(Variable.HopNum))
-        {
-            errorTracker.ValidateString(HospitalNumber, nameof(HospitalNumber));
-            errorTracker.ValidatelNumber(HospitalNumber, nameof(HospitalNumber));
-        }
-
-        if (changed.HasFlag(Variable.FirstName))
-            errorTracker.ValidateString(FirstName, nameof(FirstName));
-
-        if (changed.HasFlag(Variable.LastName))
-            errorTracker.ValidateString(LastName, nameof(LastName));
-
-        if (changed.HasFlag(Variable.ReferralType))
-            errorTracker.ValidateString(ReferralType, nameof(ReferralType));
-
-
-        if (changed.HasFlag(Variable.DOB))
-            errorTracker.ValidateNotNull(DateOfBirth, nameof(DateOfBirth));
-
-        if (changed.HasFlag(Variable.DOR))
-            errorTracker.ValidateNotNull(DateOnReferral, nameof(DateOnReferral));
-
-        if (changed.HasFlag(Variable.DRR))
-            errorTracker.ValidateNotNull(DateReferralRecieved, nameof(DateReferralRecieved));
-
-
-        if (changed.HasFlag(Variable.DOB) || changed.HasFlag(Variable.DOR))
-            errorTracker.ValidateDateOrder(DateOfBirth, nameof(DateOfBirth), DateOnReferral, nameof(DateOnReferral));
-
-        if (changed.HasFlag(Variable.DOR) || changed.HasFlag(Variable.DRR))
-            errorTracker.ValidateDateOrder(DateOnReferral, nameof(DateOnReferral), DateReferralRecieved, nameof(DateReferralRecieved));
-
-
-        if (changed.HasFlag(Variable.NHSNumber))
-        {
-            string num = ReplaceWhitespace(NHSNumber);
-            bool valid = num.Length == 10;
-            errorTracker.AddError(nameof(NHSNumber), "NHS number must contain 10 digits",!valid);
-            if (valid)
-            {
-                //Add spaces for formatting NHS number as XXX-XXX-XXXX
-                nhsNumber = num.Insert(3, " ").Insert(7, " ");
-                NotifyPropertyChanged(nameof(NHSNumber));
-            }
-        }
-
-        ShowTransferRegion = ReferralType.ToLower().Contains("relocation");
-
-        NotifyPropertyChanged(nameof(ShowTransferRegion));
-    }
-
-    private static readonly Regex sWhitespace = new Regex(@"\s+");
-    public static string ReplaceWhitespace(string input)
-    {
-        return sWhitespace.Replace(input, "");
-    }
-
-    public bool ShowTransferRegion { get; set; } = false;
-
-    public IEnumerable GetErrors(string? propertyName) => errorTracker.GetErrors(propertyName);
-
-    public bool HasErrors => errorTracker.HasErrors;
-
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        Debug.WriteLine(propertyName);
-
-        if (PropertyChanged != null)
-        {
-            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
 
 
 }
+public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
+{
+	string hospitalNumber = "";
+	//Every field needs a containing property with get and set for WPF to bind to it
+	//Set command notifies other controls of the change and validates every variable
+	//That is related to this control
+	public string HospitalNumber
+	{
+		get => hospitalNumber; set
+		{
+			hospitalNumber = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+
+	private string referralType = "";
+	public string ReferralType
+	{
+		get => referralType; set
+		{
+			referralType = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+
+	private string nhsNumber = "";
+	public string NHSNumber
+	{
+		get => nhsNumber; set
+		{
+			nhsNumber = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+	public ulong FormatNHSNumber()
+	{
+		return ulong.Parse(ReplaceWhitespace(NHSNumber));
+	}
+
+
+	string firstName = "";
+	public string FirstName
+	{
+		get => firstName; set
+		{
+			firstName = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+
+	string lastName = "";
+	public string LastName
+	{
+		get => lastName; set
+		{
+			lastName = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+
+	string? transferRegion;
+	public string? TransferRegion
+	{
+		get => transferRegion; set
+		{
+			transferRegion = value;
+			NotifyPropertyChanged();
+		}
+	}
+
+
+
+	DateTime? dateOfBirth;
+
+	public DateTime? DateOfBirth
+	{
+		get => dateOfBirth; set
+		{
+
+			dateOfBirth = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+	DateTime? dateOnReferral;
+
+	public DateTime? DateOnReferral
+	{
+		get => dateOnReferral; set
+		{
+			dateOnReferral = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+	DateTime? dateReferralRecieved;
+
+	public DateTime? DateReferralRecieved
+	{
+		get => dateReferralRecieved; set
+		{
+			dateReferralRecieved = value;
+			ValidateAll();
+			NotifyPropertyChanged();
+		}
+	}
+
+
+	public bool ShowTransferRegion { get; set; } = false;
+	///<summary>
+	///Validate all variables related to the variables changed
+	/// </summary>
+	public override void ValidateAll()
+	{
+		Debug.WriteLine("Validating...");
+
+		ValidateString(HospitalNumber, nameof(HospitalNumber));
+
+
+		ValidateString(FirstName, nameof(FirstName));
+
+		ValidateString(LastName, nameof(LastName));
+
+		ValidateString(ReferralType, nameof(ReferralType));
+
+
+		ValidateNotNull(DateOfBirth, nameof(DateOfBirth));
+
+		ValidateNotNull(DateOnReferral, nameof(DateOnReferral));
+
+		ValidateNotNull(DateReferralRecieved, nameof(DateReferralRecieved));
+
+
+		ValidateDateOrder(DateOfBirth, nameof(DateOfBirth), DateOnReferral, nameof(DateOnReferral));
+
+		ValidateDateOrder(DateOnReferral, nameof(DateOnReferral), DateReferralRecieved, nameof(DateReferralRecieved));
+
+		const int nhsModulo = 11;
+		const int nhsLength = 10;
+
+		string num = ReplaceWhitespace(NHSNumber);
+		bool valid = num.Length == nhsLength;
+		//if it is not valid it cannot be numeric
+		ulong numericNHSNum = 0;
+		bool isNumeric = !valid || ulong.TryParse(num, out numericNHSNum);
+
+		bool checksum = true; //dont bother with showing this error if not valid
+		if (valid)
+		{
+			//Add spaces for formatting NHS number as XXX-XXX-XXXX
+
+			if (isNumeric)
+			{
+				//apply the very simple modulo11 checksum
+				static int GetDigit(ulong num, int n) => (int)(num / (ulong)Math.Pow(10, n) % 10);
+
+				//loop through every value except check (index 9)
+
+				//Get digit from numeric number - will be in range  0-9
+
+				//Sum them to later find checkup
+
+				int sum = Enumerable.Range(0, nhsLength).Select(i => GetDigit(numericNHSNum, i) * (10 - i)).Sum();
+
+				//If check is 10 number is always invalid, but value 11 should be 0
+				int check = (nhsModulo - sum % nhsModulo) % nhsModulo;
+
+				checksum = GetDigit(numericNHSNum, nhsModulo - 1) == check;
+			}
+
+			nhsNumber = num.Insert(3, " ").Insert(7, " ");
+			NotifyPropertyChanged(nameof(NHSNumber));
+		}
+
+		AddError(nameof(NHSNumber), "Must contain 10 digits", !valid);
+		AddError(nameof(NHSNumber), "Must be numeric", !isNumeric);
+		AddError(nameof(NHSNumber), "Invalid NHS Number", !checksum);
+
+		ShowTransferRegion = ReferralType.ToLower().Contains("relocation");
+
+		NotifyPropertyChanged(nameof(ShowTransferRegion));
+	}
+
+
+	private static readonly Regex sWhitespace = new (@"\s+|-");
+	public static string ReplaceWhitespace(string input)
+	{
+		return sWhitespace.Replace(input, "");
+	}
+
+}
+

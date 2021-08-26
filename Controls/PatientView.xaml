@@ -65,7 +65,7 @@
                         <TextBlock.Text>
                             <Binding NotifyOnSourceUpdated="True" 
                                       ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
-                                      StringFormat="Hospital #: {0}" Path="Referral.HospitalNumber"/>
+                                      StringFormat="NHS #: {0:000 000 0000}" Path="Referral.NHSNumberKey"/>
                         </TextBlock.Text>
                     </TextBlock>
 
@@ -73,7 +73,7 @@
                         <TextBlock.Text>
                             <Binding NotifyOnSourceUpdated="True" 
                                       ConverterCulture="{x:Static gl:CultureInfo.CurrentCulture}"
-                                      StringFormat="NHS #: {0}" Path="Referral.NHSNumber"/>
+                                      StringFormat="Hospital #: {0}" Path="Referral.LocalHospitalNumber"/>
                         </TextBlock.Text>
                     </TextBlock>
 

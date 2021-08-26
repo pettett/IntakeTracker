@@ -79,7 +79,7 @@
             <TextBlock Margin="4,0,4,0" VerticalAlignment="Center"  Grid.Row="1" >
                    
                     <Run Text="{Binding Name}"/>
-                    <Run Text="Tested:"/>
+                    <Run Text=":"/>
             </TextBlock>
 
             <local:DateRecordControl Margin="4" Grid.Column="1" Grid.Row="1"

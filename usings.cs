@@ -18,3 +18,4 @@ global using System.Windows.Navigation;
 global using System.Windows.Shapes;
 global using System.Diagnostics;
 global using System.Runtime.CompilerServices;
+global using System.Diagnostics.CodeAnalysis;

@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:IntakeTrackerApp.Windows"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         Title="Settings" Height="450" Width="800"
+        MinHeight="50" MinWidth="150"
         Closing="SettingsWindow_Closing">
 
     <Window.Resources>
@@ -49,15 +50,28 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
 
+        
         <TreeView Width="200" SelectedItemChanged="SettingsView_SelectedItemChanged" Name="SettingsTreeView" Padding="4" Margin="4"/>
 
 
-        <GroupBox Grid.Column="1" x:Name="SettingBox" Header="Referral Managers">
+        <GroupBox Grid.Column="1" Grid.ColumnSpan="2" x:Name="SettingBox" Header="Referral Managers">
             <ContentControl x:Name="SettingContent" />
         </GroupBox>
 
+
+        <StackPanel Margin="4" Grid.Column="2" Grid.Row="1" Orientation="Horizontal">
+            <Button Width="100" Padding="4" Margin="4" x:Name="OKButton" Click="OKButton_Click" IsDefault="True">OK</Button>
+            <Button Width="100" Padding="4" Margin="4" x:Name="CancelButton" Click="CancelButton_Click" >Cancel</Button>
+           
+        </StackPanel>
 
     </Grid>
 </Window>

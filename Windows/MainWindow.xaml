@@ -4,7 +4,9 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:local="clr-namespace:IntakeTrackerApp"
-	xmlns:c="clr-namespace:IntakeTrackerApp.Controls" mc:Ignorable="d" Title="MainWindow" Height="900" Width="1600" 
+	xmlns:c="clr-namespace:IntakeTrackerApp.Controls" mc:Ignorable="d" Title="Referral Intake Tracker"
+        Height="900" Width="1600" 
+        MinWidth="700" MinHeight="200"
         Name="MainWindow1" DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
@@ -52,6 +54,7 @@
         <KeyBinding Key="N" Modifiers="Control" Command="{x:Static local:MainWindow.NewReferralCmd}"/>
         <KeyBinding Key="S" Modifiers="Control" Command="Save"/>
         <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}"/>
     </Window.InputBindings>
 
     <DockPanel>
@@ -60,6 +63,7 @@
                 <MenuItem Header="_New Referral" InputGestureText="Ctrl+N" Command="{x:Static local:MainWindow.NewReferralCmd}" />
                 <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="Save"/>
                 <MenuItem Header="_Undo" Command="{Binding UndoCommand}" />
+                <MenuItem Header="_Redo" Command="{Binding RedoCommand}" />
 
                 <MenuItem Header="Include _Archive" IsCheckable="true" IsChecked="{Binding IncludeArchived}"/>
 
@@ -79,8 +83,8 @@
                 <MenuItem Header="_LP Summary" Command="{x:Static local:MainWindow.OpenLPCommand}" />
                 <MenuItem Header="_Bloods Summary" Command="{x:Static local:MainWindow.OpenBloodsCommand}" />
             </MenuItem>
-        
-            <MenuItem Header="_Debug">
+
+            <MenuItem Header="_Debug" Visibility="{x:Static local:MainWindow.IsDebug}" >
                 <MenuItem Header="_Crash Program" Click="Crash_Click"/>
                 <MenuItem Header="_Simulate Concurrency Conflict" Click="Concurrency_Click"/>
             </MenuItem>
@@ -101,11 +105,7 @@
 
             <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" ShowsPreview="True" Width="5"/>
 
-            <Button Command="{x:Static local:MainWindow.NewReferralCmd}" Grid.Row="1">
-                <Button.Content>
-                    Add new patient
-                </Button.Content>
-            </Button>
+            <Button Command="{x:Static local:MainWindow.NewReferralCmd}" Grid.Row="1" Content="New Referral"/>
 
             <ListView x:Name="PatientsList" ItemsSource="{Binding Context.ReferralSummaries}" AlternationCount="2"
                       SelectionMode="Single" MouseDown="PatientsList_MouseDown" VirtualizingStackPanel.IsVirtualizing="True"
@@ -168,42 +168,7 @@
 
 
             <TabControl Grid.Column="2" Grid.RowSpan="2" x:Name="TabScreen" Grid.ColumnSpan="2" />
-            <!--  
-                <TabControl.Resources>
-
-                    <DataTemplate DataType="{x:Type local:ReferralTab}">
-                        <c:PatientView DataContext="{Binding}" Referral="{Binding Referral}"/>
-                    </DataTemplate>
-                    
-                    <DataTemplate DataType="{x:Type local:GlobalViewTab}">
-                        <c:GlobalPatientView/>
-                    </DataTemplate>
-
-
-                </TabControl.Resources>
-                
-           <TabControl.ItemTemplate>
-                    <! this is the header template 
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-
-                            <TextBlock Text="{Binding Header}" />
-                            <Button Margin="8,0,0,0" Visibility="{Binding CanClose, Converter={StaticResource cBoolToVis}}">
-                                <Image Width="16" Height="16" Source="/Images/Close_16x.png" />
-                            </Button>
-                        </StackPanel>
-                    </DataTemplate>
-                </TabControl.ItemTemplate>
-                
-                <TabControl.ContentTemplate>
-                    <! this is the body of the TabItem template-
-                    <DataTemplate>
-                        <ContentControl Content="{Binding}"/>
-                    </DataTemplate>
-                </TabControl.ContentTemplate>  
-
-
-            </TabControl>-->
+           
 
         </Grid>
     </DockPanel>

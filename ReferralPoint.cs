@@ -9,23 +9,23 @@ using LiveCharts.Wpf;
 using LiveCharts;
 namespace IntakeTrackerApp.Controls
 {
-    public class ReferralPoint : ObservablePoint
-    {
-        public static void Init()
-        {
-            Charting.For<ReferralPoint>(Mappers.Xy<ReferralPoint>().X(value => value.X).Y(value => value.Y));
-        }
-        public ReferralPoint(double x, double y, PatientReferral pointReferral) : base(x, y)
-        {
-            PointReferral = pointReferral;
-        }
+	public class ReferralPoint : ObservablePoint
+	{
+		public static void Init()
+		{
+			Charting.For<ReferralPoint>(Mappers.Xy<ReferralPoint>().X(value => value.X).Y(value => value.Y));
+		}
+		public ReferralPoint(double x, double y, PatientReferral pointReferral) : base(x, y)
+		{
+			PointReferral = pointReferral;
+		}
 
-        public PatientReferral PointReferral { get; set; }
+		public PatientReferral PointReferral { get; set; }
 
-        public void OnClicked()
-        {
-            MainWindow.Singleton.OpenReferral(PointReferral);
-        }
-    }
+		public void OnClicked()
+		{
+			MainWindow.OpenReferral(PointReferral);
+		}
+	}
 
 }
