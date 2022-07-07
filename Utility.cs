@@ -53,8 +53,16 @@ public static class LiveChartsExtensions
 	public static SeriesCollection GenerateSeries() => new SeriesCollection();
 	public static SectionsCollection GenerateSections() => new SectionsCollection();
 
+	public static SeriesCollection AddHistogram(this SeriesCollection s, IEnumerable<double> collection) 
+	{
+		s.AddSeries<ColumnSeries, double>(new ChartValues<double>(collection), out var series);
 
-	public static SeriesCollection AddColumns<T>(this SeriesCollection s, IEnumerable<T> collection)
+			series.ColumnPadding = 0;
+				
+		series.DataLabels = false;
+		return s;
+	}
+	public static SeriesCollection AddColumns<T>(this SeriesCollection s, IEnumerable<T> collection )
 	{
 		s.AddSeries<ColumnSeries, T>(new ChartValues<T>(collection));
 		return s;

@@ -3,7 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:IntakeTrackerApp.Windows"
+        xmlns:l="clr-namespace:IntakeTrackerApp"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         Title="Settings" Height="450" Width="800"
         MinHeight="50" MinWidth="150"
@@ -33,6 +35,55 @@
         </DataTemplate>
 
 
+        <DataTemplate DataType="{x:Type local:ThresholdSettings}">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.ColumnSpan="2">
+                    Change thresholds for red warnings on certain waiting times
+                </Label>
+
+
+
+                <Label Grid.Row="1" >MRI Report warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="1" Grid.Column="1"  Value="{Binding MRIReportWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="2" >LP Appointment warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="2" Grid.Column="1"  Value="{Binding LPAppointmentWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="3" >LP Report warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="3" Grid.Column="1"  Value="{Binding LPReportedWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="4" >EP Appointment warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="4" Grid.Column="1"  Value="{Binding EPAppointmentWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="5" >EP Report warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="5" Grid.Column="1"  Value="{Binding EPReportedWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="6" >Bloods Appointment warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="6" Grid.Column="1"  Value="{Binding BloodsAppointmentWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="7" >Bloods Reported warning threshold</Label>
+                <xctk:UIntegerUpDown  Grid.Row="7" Grid.Column="1"  Value="{Binding BloodsReportedWarningThreshold.Item ,UpdateSourceTrigger=PropertyChanged}" />
+
+            </Grid>
+
+        </DataTemplate>
         <DataTemplate DataType="{x:Type local:Setting}">
 
             <Label>
@@ -40,7 +91,6 @@
             </Label>
 
         </DataTemplate>
-
     </Window.Resources>
 
 
@@ -52,13 +102,13 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        
+
         <TreeView Width="200" SelectedItemChanged="SettingsView_SelectedItemChanged" Name="SettingsTreeView" Padding="4" Margin="4"/>
 
 
@@ -70,7 +120,7 @@
         <StackPanel Margin="4" Grid.Column="2" Grid.Row="1" Orientation="Horizontal">
             <Button Width="100" Padding="4" Margin="4" x:Name="OKButton" Click="OKButton_Click" IsDefault="True">OK</Button>
             <Button Width="100" Padding="4" Margin="4" x:Name="CancelButton" Click="CancelButton_Click" >Cancel</Button>
-           
+
         </StackPanel>
 
     </Grid>

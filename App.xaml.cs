@@ -1,4 +1,8 @@
-﻿namespace IntakeTrackerApp;
+﻿using System.Globalization;
+using System.Threading;
+using System.Windows.Markup;
+
+namespace IntakeTrackerApp;
 
 
 /// <summary>
@@ -10,10 +14,16 @@ public partial class App : Application
 	{
 		Debug.WriteLine("Loading App");
 
+		Thread.CurrentThread.CurrentCulture = new CultureInfo("en-GB");
+		Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-GB");
+		FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(
+					XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
 		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(App_DispatcherUnhandledException);
 
 	}
-	void App_DispatcherUnhandledException(object sender, UnhandledExceptionEventArgs e)
+
+	private void App_DispatcherUnhandledException(object sender, UnhandledExceptionEventArgs e)
 	{
 		// Process unhandled exception
 

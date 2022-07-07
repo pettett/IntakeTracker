@@ -1,6 +1,7 @@
 ﻿
 
 using System.Text.RegularExpressions;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp;
 
@@ -29,7 +30,10 @@ public partial class ReferralDetailsWindow : Window
 		viewModel.DateReferralRecieved = referral.DateReferralReceived;
 		viewModel.NHSNumber = referral.NHSNumberKey.ToString("000 000 0000");
 		viewModel.TransferRegion = referral.TransferRegion;
+		viewModel.Weight = referral.Weight;
+		viewModel.Height = referral.Height;
 
+		Debug.WriteLine($"Updating core details: height:{viewModel.Height}, weight: {viewModel.Weight}");
 		InitializeComponent();
 		Windows.WindowUtility.HideMinimizeAndMaximizeButtons(this);
 
@@ -42,7 +46,6 @@ public partial class ReferralDetailsWindow : Window
 	public void ApplyDateToReferral(PatientReferral referral)
 	{
 		//  referral.HospitalNumber = ulong.Parse(HospitalNumber);
-
 		referral.FirstName = viewModel.FirstName;
 		referral.LastName = viewModel.LastName;
 		referral.DateOfBirth = viewModel.DateOfBirth!.Value;
@@ -52,6 +55,10 @@ public partial class ReferralDetailsWindow : Window
 		referral.LocalHospitalNumber = viewModel.HospitalNumber;
 
 		referral.TransferRegion = viewModel.ShowTransferRegion ? viewModel.TransferRegion : null;
+		referral.Weight = viewModel.Weight;
+		referral.Height = viewModel.Height;
+
+		Debug.WriteLine($"Updating core details: height:{referral.Height}, weight: {referral.Weight}");
 	}
 	private void okButton_Click(object sender, RoutedEventArgs e)
 	{
@@ -73,118 +80,93 @@ public partial class ReferralDetailsWindow : Window
 }
 public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 {
-	string hospitalNumber = "";
+
+
+	private string hospitalNumber = "";
 	//Every field needs a containing property with get and set for WPF to bind to it
 	//Set command notifies other controls of the change and validates every variable
 	//That is related to this control
 	public string HospitalNumber
 	{
-		get => hospitalNumber; set
-		{
-			hospitalNumber = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => hospitalNumber;
+		set => SetProperty(ref hospitalNumber, value);
 	}
 
 	private string referralType = "";
 	public string ReferralType
 	{
-		get => referralType; set
-		{
-			referralType = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => referralType;
+		set => SetProperty(ref referralType, value);
 	}
 
 	private string nhsNumber = "";
 	public string NHSNumber
 	{
-		get => nhsNumber; set
-		{
-			nhsNumber = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
-	}
-	public ulong FormatNHSNumber()
-	{
-		return ulong.Parse(ReplaceWhitespace(NHSNumber));
+		get => nhsNumber;
+		set => SetProperty(ref nhsNumber, value);
 	}
 
 
-	string firstName = "";
+	private string firstName = "";
 	public string FirstName
 	{
-		get => firstName; set
-		{
-			firstName = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => firstName;
+		set => SetProperty(ref firstName, value);
 	}
 
-	string lastName = "";
+	private string lastName = "";
 	public string LastName
 	{
-		get => lastName; set
-		{
-			lastName = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => lastName;
+		set => SetProperty(ref lastName, value);
 	}
 
-	string? transferRegion;
+	private string? transferRegion;
 	public string? TransferRegion
 	{
-		get => transferRegion; set
-		{
-			transferRegion = value;
-			NotifyPropertyChanged();
-		}
+		get => transferRegion;
+		set => SetProperty(ref transferRegion, value);
+	}
+	private double? weight;
+	public double? Weight
+	{
+		get => weight;
+		set => SetProperty(ref weight, value);
+	}
+	private double? height;
+	public double? Height
+	{
+		get => height;
+		set => SetProperty(ref height, value);
 	}
 
-
-
-	DateTime? dateOfBirth;
-
+	private DateTime? dateOfBirth;
 	public DateTime? DateOfBirth
 	{
-		get => dateOfBirth; set
-		{
-
-			dateOfBirth = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => dateOfBirth;
+		set => SetProperty(ref dateOfBirth, value);
 	}
-	DateTime? dateOnReferral;
 
+	private DateTime? dateOnReferral;
 	public DateTime? DateOnReferral
 	{
-		get => dateOnReferral; set
-		{
-			dateOnReferral = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => dateOnReferral;
+		set => SetProperty(ref dateOnReferral, value);
 	}
-	DateTime? dateReferralRecieved;
 
+	private DateTime? dateReferralRecieved;
 	public DateTime? DateReferralRecieved
 	{
-		get => dateReferralRecieved; set
-		{
-			dateReferralRecieved = value;
-			ValidateAll();
-			NotifyPropertyChanged();
-		}
+		get => dateReferralRecieved;
+		set => SetProperty(ref dateReferralRecieved, value);
 	}
 
 
 	public bool ShowTransferRegion { get; set; } = false;
+	public ulong FormatNHSNumber()
+	{
+		return ulong.Parse(ReplaceWhitespace(NHSNumber));
+	}
 	///<summary>
 	///Validate all variables related to the variables changed
 	/// </summary>
@@ -247,7 +229,7 @@ public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 			}
 
 			nhsNumber = num.Insert(3, " ").Insert(7, " ");
-			NotifyPropertyChanged(nameof(NHSNumber));
+			NotifyPropertyChanged(nameof(NHSNumber), false);
 		}
 
 		AddError(nameof(NHSNumber), "Must contain 10 digits", !valid);
@@ -256,11 +238,11 @@ public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 
 		ShowTransferRegion = ReferralType.ToLower().Contains("relocation");
 
-		NotifyPropertyChanged(nameof(ShowTransferRegion));
+		NotifyPropertyChanged(nameof(ShowTransferRegion), false);
 	}
 
 
-	private static readonly Regex sWhitespace = new (@"\s+|-");
+	private static readonly Regex sWhitespace = new(@"\s+|-");
 	public static string ReplaceWhitespace(string input)
 	{
 		return sWhitespace.Replace(input, "");

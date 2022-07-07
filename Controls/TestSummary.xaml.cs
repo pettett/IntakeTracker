@@ -1,13 +1,27 @@
 ﻿using LiveCharts.Defaults;
 using System.Collections.ObjectModel;
 using IntakeTrackerApp.Extensions;
+using System.Globalization;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp.Controls;
+public class CutoffConverter : IValueConverter
+{
+	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		return ((uint)value) > (Cutoff?.Item ?? 0);
+	}
 
+	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		throw new NotImplementedException();
+	}
+	public ObservableItem<uint>? Cutoff { get; set; }
+}
 /// <summary>
 /// Interaction logic for TestSummary.xaml
 /// </summary>
-public partial class TestSummary : UserControl
+public partial class TestSummary : UserControl, INotifyPropertyChanged
 {
 
 
@@ -28,6 +42,17 @@ public partial class TestSummary : UserControl
 		get => $"Current Referrals: {Context.ReferralSummaries.Count}";
 		set { }
 	}
+	public string MDTNewLastWeek
+	{
+		get => $"Recent Referrals (last week): {Context.ReferralSummaries.Where(r => r.DateReferralReceived.DaysSince() < 7).Count()}";
+		set { }
+	}
+	public string MDTClinicLastWeek
+	{
+		get => $"Recent Clinic (last week): {Context.ReferralSummaries.Where(r => r.MedicalAppointmentNeeded == true && r.MedicalAppointment.DaysSince() < 7 ).Count()}";
+		set { }
+	}
+
 	public double AverageWaitTime { get; set; }
 	public string WaitingTimeInfo
 	{
@@ -38,6 +63,11 @@ public partial class TestSummary : UserControl
 	public TestType TypeFilter { get; set; }
 	public bool IncludeNone { get; set; }
 
+	public event PropertyChangedEventHandler? PropertyChanged;
+	private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+	{
+		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+	}
 	/// <summary>
 	/// Remove tests if type is not flagged, or if test is none
 	/// </summary>
@@ -54,25 +84,28 @@ public partial class TestSummary : UserControl
 				AllAwaitedEvents.Add(x);
 			}
 		}
+		NotifyPropertyChanged(nameof(GlobalOne));
+		NotifyPropertyChanged(nameof(MDTNewLastWeek));
+		NotifyPropertyChanged(nameof(MDTClinicLastWeek));
+	
+		
 	}
-	public ObservablePoint[] GenerateBars(int waitingTimeWidth, Dictionary<int, double> waitingTimes)
+	public double[] GenerateBars(uint waitingTimeWidth, Dictionary<uint, double> waitingTimes)
 	{
-		int barCount = waitingTimes.Keys.DefaultIfEmpty().Max() + 1;
+		uint barCount = waitingTimes.Keys.DefaultIfEmpty().Max() + 1;
 
-		ObservablePoint[] bars = new ObservablePoint[barCount];
-
-		for (int i = 0; i < bars.Length; i++)
-			bars[i] = new(i * waitingTimeWidth, 0);
+		double[] bars = new double[barCount];
 
 		foreach (var kvp in waitingTimes)
 		{
-			bars[kvp.Key].Y = kvp.Value;
+			bars[kvp.Key] = kvp.Value;
 		}
 		return bars;
 	}
 
 
-
+	const uint waitingTimeWidth = 5;
+	public Func<double, string> Formatter { get; set; } = x => $"{waitingTimeWidth * x} - {waitingTimeWidth * (x + 1)-1} Days";
 
 	public TestSummary(TestType TypeFilter, bool IncludeNone)
 	{
@@ -93,9 +126,8 @@ public partial class TestSummary : UserControl
 			{ "Other", .0 },
 		};
 
-		Dictionary<int, double> waitingTimes = new();
+		Dictionary<uint, double> waitingTimes = new();
 
-		int waitingTimeWidth = 5;
 
 		int totalEvents = 0;
 		double totalWait = 0;
@@ -126,7 +158,7 @@ public partial class TestSummary : UserControl
 				totalEvents++;
 				totalWait += x.WaitingTime;
 
-				var w = Math.Max(0, x.WaitingTime / waitingTimeWidth);
+				var w =  Math.Max(0, x.WaitingTime / waitingTimeWidth);
 				if (waitingTimes.ContainsKey(w))
 					waitingTimes[w]++;
 				else
@@ -162,11 +194,12 @@ public partial class TestSummary : UserControl
 
 
 		WaitingTimeCollection = LiveChartsExtensions.GenerateSeries().
-			AddLine(GenerateBars(waitingTimeWidth, waitingTimes), 0.25);
+			AddHistogram(GenerateBars(waitingTimeWidth, waitingTimes));
+	
+
 
 		ReferralCatagoriesCollection = LiveChartsExtensions.GenerateSeries().
 			AddColumns(ReferralCatagories.Values);
-
 
 
 
@@ -174,7 +207,8 @@ public partial class TestSummary : UserControl
 
 		InitializeComponent();
 		//Apply changes to in application elements
-		WaitingTimeAxisX.Sections = LiveChartsExtensions.GenerateSections().AddVerticalSeperator(AverageWaitTime, "Average Wait Time");
+		WaitingTimeAxisX.Sections = LiveChartsExtensions.GenerateSections().
+			AddVerticalSeperator(AverageWaitTime/waitingTimeWidth, "Average Wait Time");
 
 
 		ReferralsOverTimeAxisX.Sections = LiveChartsExtensions.GenerateSections().AddTodayLine();

@@ -1,20 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <MinimumPlatformVersion>7.0</MinimumPlatformVersion>
-    <LangVersion>10.0</LangVersion>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<MinimumPlatformVersion>7.0</MinimumPlatformVersion>
+		<LangVersion>preview</LangVersion>
 
-  </PropertyGroup>
+		<EnablePreviewFeatures>True</EnablePreviewFeatures>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Images\Close_16x.png" />
-    <None Remove="Images\CommentFilled_16x.png" />
-    <None Remove="Images\Edit_grey_16x.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Images\Close_16x.png" />
+		<None Remove="Images\CommentFilled_16x.png" />
+		<None Remove="Images\Edit_grey_16x.png" />
+		<None Remove="Images\MailOpen_16x.png" />
+		<None Remove="New patient pathway clinic letter.docx" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="New patient pathway clinic letter.docx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
 
   <ItemGroup>
     <Resource Include="Images\Close_16x.png">
@@ -26,30 +39,34 @@
     <Resource Include="Images\Edit_grey_16x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\MailOpen_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.13.1" />
-    <PackageReference Include="LiveCharts.Wpf.NetCore3" Version="0.9.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.7.21378.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.7.21378.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.7.21378.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+		<PackageReference Include="DocumentFormat.OpenXml" Version="2.13.1" />
+		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.1.0" />
+		<PackageReference Include="LiveCharts.Wpf.NetCore3" Version="0.9.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.7.21378.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-preview.7.21378.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.7.21378.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Controls\ReferralPointTooltip.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Controls\ReferralPointTooltip.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Page Update="Controls\ReferralPointTooltip.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
+	<ItemGroup>
+		<Page Update="Controls\ReferralPointTooltip.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+	</ItemGroup>
 
 </Project>

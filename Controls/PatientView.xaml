@@ -77,20 +77,32 @@
                         </TextBlock.Text>
                     </TextBlock>
 
+                    <TextBlock Text="{Binding Referral.Height, StringFormat=Height: {0}cm, NotifyOnSourceUpdated=True}"/>
+                    <TextBlock Text="{Binding Referral.Weight, StringFormat=Weight: {0}kg, NotifyOnSourceUpdated=True}"/>
 
                     <CheckBox  IsChecked="{Binding Archived, NotifyOnSourceUpdated=True}" 
                               Content="Archive" />
                 </StackPanel>
 
 
-
+                <StackPanel>
+                    
                 <Button x:Name="EditPatientDetailsButton"
                         Margin="8" Height="20" Width="20" VerticalAlignment="Top"
                         Click="EditPatientDetailsButton_Click">
 
                     <Image Source="/Images/Edit_grey_16x.png" Width="16" Height="16"/>
                 </Button>
+                
+                <Button x:Name="CreateMailFromTemplateButton"
+                        Margin="8" Height="20" Width="20" VerticalAlignment="Top"
+                        Click="CreateMailFromTemplateButton_Click" DockPanel.Dock="Left">
 
+                    <Image Source="/Images/MailOpen_16x.png" Width="16" Height="16"/>
+                </Button>
+
+                </StackPanel>
+                
                 <TextBlock DockPanel.Dock="Top">Brief Details:</TextBlock>
                 <TextBox TextWrapping="Wrap" 
                          Text="{Binding Referral.BriefDetails,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
@@ -289,26 +301,71 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <local:CollapsibleGroupControl Header="Nursing Appointment" 
+                <local:CollapsibleGroupControl Header="Nursing Clinic" 
                                                Enabled="{Binding Referral.NursingAppointmentNeeded,NotifyOnSourceUpdated=True}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
 
-
-                    <local:DateRecordControl  HorizontalAlignment="Stretch"
-                                             SelectedDate="{Binding Referral.NursingAppointment.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.NursingAppointment.Comment,NotifyOnSourceUpdated=True}"
+                        <TextBlock Margin="4" Text="Provisional Date"/>
+                        <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
+                                             SelectedDate="{Binding Referral.ProvisinalNursingClinic.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.ProvisinalNursingClinic.Comment,NotifyOnSourceUpdated=True}"
                                              Margin="4"/>
 
+                        <TextBlock Margin="4" Grid.Row="1" Text="Date"/>
+                        <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
+                                             SelectedDate="{Binding Referral.NursingAppointment.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.NursingAppointment.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4" Grid.Row="1"/>
+
+                        <TextBlock  Grid.Row="2" Grid.ColumnSpan="2" Text="Plan and Comments"/>
+                        <TextBox AcceptsReturn="True" AcceptsTab="True" Grid.Row="3" Grid.ColumnSpan="2" 
+                                 Text="{Binding Referral.NursingClinicPlan}"/>
+                    </Grid>
                 </local:CollapsibleGroupControl>
 
 
-                <local:CollapsibleGroupControl Grid.Column="1" Header="Medical Appointment" 
+                <local:CollapsibleGroupControl Grid.Column="1" Header="Consultant Clinic" 
                                                Enabled="{Binding Referral.MedicalAppointmentNeeded,NotifyOnSourceUpdated=True}">
 
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
 
-                    <local:DateRecordControl  HorizontalAlignment="Stretch"
+                        <TextBlock Margin="4" Text="Provisional Date"/>
+                        <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
+                                             SelectedDate="{Binding Referral.ProvisionalConsultantClinic.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.ProvisionalConsultantClinic.Comment,NotifyOnSourceUpdated=True}"
+                                             Margin="4"/>
+
+                        <TextBlock Margin="4" Grid.Row="1" Text="Date"/>
+                        <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
                                              SelectedDate="{Binding Referral.MedicalAppointment.Date,NotifyOnSourceUpdated=True}"
                                              Comment="{Binding Referral.MedicalAppointment.Comment,NotifyOnSourceUpdated=True}"
-                                             Margin="4"/>
+                                             Margin="4" Grid.Row="1"/>
+
+                        <TextBlock  Grid.Row="2" Grid.ColumnSpan="2" Text="Plan and Comments"/>
+                        <TextBox AcceptsReturn="True" AcceptsTab="True" Grid.Row="3" Grid.ColumnSpan="2" 
+                                 Text="{Binding Referral.ConsultantClinicPlan}"/>
+                    </Grid>
+
 
                 </local:CollapsibleGroupControl>
             </Grid>

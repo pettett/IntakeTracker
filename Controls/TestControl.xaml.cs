@@ -1,5 +1,6 @@
 ﻿
 using System.Runtime.CompilerServices;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp.Controls;
 
@@ -12,7 +13,7 @@ public partial class TestControl : UserControl, INotifyPropertyChanged, ITrackab
 	public static readonly DependencyProperty TestProperty = DependencyProperty.Register(
 		"Test", typeof(Test), typeof(TestControl), new FrameworkPropertyMetadata
 		{
-			DefaultValue = new Test("ERROR", TestType.None),
+			DefaultValue = new Test("ERROR"),
 			BindsTwoWayByDefault = true,
 			DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
 		});

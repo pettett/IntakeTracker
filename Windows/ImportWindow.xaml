@@ -32,6 +32,25 @@
             <CheckBox Content="Un-Archive imported referrals"
                       IsEnabled="{Binding ImportArchive}" IsChecked="{Binding UnArchiveImported}"/>
 
+
+            <ListView Height="324" ItemsSource="{Binding AllInFile}">
+                <ListView.View>
+                    <GridView >
+                        <GridView.Columns>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                            <GridViewColumn Header="NHS Number" 
+                                            DisplayMemberBinding="{Binding NHSNumberKey,StringFormat={}{0:000 000 0000} }"/>
+
+                            <GridViewColumn Header="Hosp Number" DisplayMemberBinding="{Binding LocalHospitalNumber}"/>
+                            <GridViewColumn Header="Archived" DisplayMemberBinding="{Binding Archived}"/>
+                            <GridViewColumn Header="Age" DisplayMemberBinding="{Binding Age}"/>
+                            <GridViewColumn Header="Referral Received" DisplayMemberBinding="{Binding DateReferralReceived}"/>
+                            <GridViewColumn Header="Referral Type" DisplayMemberBinding="{Binding  ReferralType}"/>
+                            <GridViewColumn Header="Quick Status" DisplayMemberBinding="{Binding QuickStatus }"/>
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </StackPanel>
 
         <Button Grid.Row="1" Click="CancelButton_Clicked"  x:Name="Cancel" Margin="4">

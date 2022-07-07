@@ -3,6 +3,8 @@
 using System.Collections.ObjectModel;
 using LiveCharts.Configurations;
 using IntakeTrackerApp.Extensions;
+using IntakeTrackerApp.Windows;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp.Controls;
 
@@ -69,7 +71,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	public PatientReferral Referral
 	{
 		get => (PatientReferral)GetValue(ReferralProperty);
-		set { SetValue(ReferralProperty, value); }
+		set => SetValue(ReferralProperty, value);
 	}
 
 	public static readonly DependencyProperty ReferralProperty
@@ -338,6 +340,12 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
+	private void CreateMailFromTemplateButton_Click(object sender, RoutedEventArgs e)
+	{
+		Debug.WriteLine("creating mail template");
+		LetterTemplateWindow t =  new (this);
+		t.ShowDialog();
+	}
 
 	private void EditPatientDetailsButton_Click(object sender, RoutedEventArgs e)
 	{
@@ -360,6 +368,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 					MainWindow.OpenReferral(Referral);
 				}
 			}
+
 		}
 
 

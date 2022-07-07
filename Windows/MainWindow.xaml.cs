@@ -7,6 +7,7 @@ namespace IntakeTrackerApp;
 using Windows;
 using Controls;
 using System.Diagnostics.CodeAnalysis;
+using IntakeTrackerApp.Data;
 
 public class DateOnlyConverter : IValueConverter
 {
@@ -37,6 +38,7 @@ public interface ITabable
 	string Header { get; }
 	object GenerateContent();
 	void OnOpened();
+	void Refresh();
 }
 
 public record ReferralTab(PatientReferral Referral) : ITabable
@@ -52,19 +54,28 @@ public record ReferralTab(PatientReferral Referral) : ITabable
 	{
 
 	}
+	public void Refresh()
+	{
+
+	}
 }
 
 public record SummaryTab(TestType TestName, bool IncludeNone) : ITabable
 {
 	public bool CanClose => !IncludeNone;
 	public string Header => $"{TestName} Summary";
-	TestSummary? s;
+
+	private TestSummary? s;
 	public object GenerateContent()
 	{
 		s = new TestSummary(TestName, IncludeNone);
 		return s;
 	}
 	public void OnOpened()
+	{
+		s?.Refresh();
+	}
+	public void Refresh()
 	{
 		s?.Refresh();
 	}
@@ -109,8 +120,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 			Context = context;
 		}
 
-		readonly ITabable Tab;
-		readonly MainWindow Context;
+		private readonly ITabable Tab;
+		private readonly MainWindow Context;
 		protected override void OnClick()
 		{
 			Context.CloseTab(Tab);
@@ -137,13 +148,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 	public ListCollectionView view;
 	public Data Context { get; set; } = Data.Singleton;
 
-
-	Dictionary<ITabable, TabItem> openTabsContent = new();
-	List<ITabable> openTabs = new();
+	private Dictionary<ITabable, TabItem> openTabsContent = new();
+	private List<ITabable> openTabs = new();
 
 	public static MainWindow? Singleton { get; private set; }
+
 	//Currently selected patient
-	PatientReferral? selected;
+	private PatientReferral? selected;
 	public PatientReferral? Selected
 	{
 		get => selected;
@@ -201,6 +212,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 	}
 
 
+ 
 
 	private bool ReferralFilter(object item)
 	{	
@@ -322,8 +334,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
 	public class PatientComparer : IComparer
 	{
-		bool direction;
-		string comparing = "";
+		private bool direction;
+		private string comparing = "";
 		public string Comparing
 		{
 			get => comparing; set
@@ -358,7 +370,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 		}
 	}
 
-	static PatientComparer p = new();
+	private static PatientComparer p = new();
 
 	public void ChangeSortingState(string columnName)
 	{
@@ -373,11 +385,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 	public void FirstNameColumnHeader_Click(object sender, RoutedEventArgs e) => ChangeSortingState("FirstName");
 	public void LastNameColumnHeader_Click(object sender, RoutedEventArgs e) => ChangeSortingState("LastName");
 
-
-
-
-
-	void TabScreen_SelectionChanged(object sender, SelectionChangedEventArgs e)
+	private void TabScreen_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
 			openTabs[TabScreen.SelectedIndex].OnOpened();
@@ -446,6 +454,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
 
 		}
+
+		foreach (var t in openTabs)
+			t.Refresh();
+
 	}
 	private void Save_Executed(object sender, RoutedEventArgs e)
 	{
@@ -473,7 +485,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 	public void ConfigureDialog(FileDialog dialog)
 	{
 		dialog.FileName = $"Exported Data {DateTime.Now.Year}_{DateTime.Now.Month}_{DateTime.Now.Day}"; // Default file extension
-		dialog.DefaultExt = ".json"; // Default file extension
+		dialog.DefaultExt = ".xlsx"; // Default file extension
 		dialog.Filter = "Excel files|*.xlsx|JSON files|*.json"; // Filter files by extension
 	}
 

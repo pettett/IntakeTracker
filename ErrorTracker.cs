@@ -8,11 +8,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp
 {
 
-	public abstract class ErrorTrackerViewModelBase : ViewModelBase, INotifyDataErrorInfo
+    public abstract class ErrorTrackerViewModelBase : ViewModelBase, INotifyDataErrorInfo
 	{
 		[JsonIgnore, NotMapped] private readonly Dictionary<string, List<string>> propErrors = new();
 		protected void OnErrorsChanged(object? obj, DataErrorsChangedEventArgs args)
@@ -24,6 +25,17 @@ namespace IntakeTrackerApp
 
 
 		public abstract void ValidateAll();
+		public void NotifyPropertyChanged([CallerMemberName] string? propertyName = null, bool validate = false)
+		{
+			if (validate)
+				ValidateAll();
+			base.NotifyPropertyChanged(propertyName);
+		}
+		public override void NotifyPropertyChanged([CallerMemberName] string? propertyName = null)
+		{
+			ValidateAll();
+			base.NotifyPropertyChanged(propertyName);
+		}
 
 		public void AddError(string propertyName, string error, bool enabled)
 		{

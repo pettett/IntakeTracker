@@ -7,7 +7,9 @@
 	xmlns:c="clr-namespace:IntakeTrackerApp.Controls" mc:Ignorable="d" Title="Referral Intake Tracker"
         Height="900" Width="1600" 
         MinWidth="700" MinHeight="200"
-        Name="MainWindow1" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+        Name="MainWindow1" 
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        >
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
 

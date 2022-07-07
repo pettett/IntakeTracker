@@ -19,10 +19,10 @@
 
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="Referral on {0}: {1}, Hosp: {2}">
+                                <MultiBinding StringFormat="Referral on {0:d}: {1}, NHS #: {2:000 000 0000}">
                                     <Binding Path="ChartPoint.Instance.PointReferral.DateReferralReceived"/>
-                                    <Binding Path="ChartPoint.Instance.PointReferral.Summary.Name"/>
-                                    <Binding Path="ChartPoint.Instance.PointReferral.HospitalNumber"/>
+                                    <Binding Path="ChartPoint.Instance.PointReferral.Name"/>
+                                    <Binding Path="ChartPoint.Instance.PointReferral.NHSNumberKey"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>

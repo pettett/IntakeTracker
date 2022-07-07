@@ -1,0 +1,23 @@
+﻿<Window x:Class="IntakeTrackerApp.Windows.LetterTemplateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IntakeTrackerApp.Windows"
+        mc:Ignorable="d"
+        Title="LetterTemplateWindow" Height="450" Width="800">
+    <StackPanel DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LetterTemplateWindow}}}">
+        <TextBlock Text="Save Location:"/>
+        <TextBlock Text="{Binding SaveLocation}"/>
+        <TextBlock Text="Patient Address:"/>
+        <TextBox Text="{Binding PatientAddress}" AcceptsReturn="True" AcceptsTab="True"/>
+        <TextBlock Text="Referring Physician:"/>
+        <TextBox Text="{Binding ReferringPhysician}"/>
+        <TextBlock Text="Consultant Name:"/>
+        <TextBox Text="{Binding ConsultantName}"/>
+
+        <TextBlock Text="Save Location:"/>
+        <Button Content="Select Save Location"  x:Name="SelectSaveLocationButton" Click="SelectSaveLocationButton_Click" />
+        <Button Content="Create Letter" x:Name="CreateTemplateButton" Click="CreateTemplateButton_Click" />
+    </StackPanel>
+</Window>

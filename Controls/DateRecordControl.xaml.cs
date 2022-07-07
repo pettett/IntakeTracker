@@ -9,6 +9,8 @@ namespace IntakeTrackerApp.Controls;
 public partial class DateRecordControl : UserControl, INotifyPropertyChanged
 {
 
+
+
 	public static readonly DependencyProperty SelectedDateProperty = DependencyProperty.Register(
 		"SelectedDate", typeof(DateTime?), typeof(DateRecordControl), new FrameworkPropertyMetadata
 		{
@@ -28,21 +30,21 @@ public partial class DateRecordControl : UserControl, INotifyPropertyChanged
 	public DateTime? SelectedDate
 	{
 		get => (DateTime?)GetValue(SelectedDateProperty);
-		set
-		{
-			SetValue(SelectedDateProperty, value);
-			NotifyPropertyChanged();
-		}
+		set => SetProperty(SelectedDateProperty, value);
+		
 	}
 
 	public string Comment
 	{
 		get => (string)GetValue(CommentProperty);
-		set
-		{
-			SetValue(CommentProperty, value);
-			NotifyPropertyChanged();
-		}
+		set =>	SetProperty(CommentProperty, value);
+		
+	}
+
+	public void SetProperty(DependencyProperty prop, object? value)
+	{
+		SetValue(prop, value);
+		NotifyPropertyChanged();
 	}
 
 

@@ -2,8 +2,7 @@
 
 namespace IntakeTrackerApp.Controls;
 
-
-class CollapsibleGroupControl : ContentControl
+internal class CollapsibleGroupControl : ContentControl
 {
 	public static KeyValuePair<bool?, string>[] IsNeededOptions { get; set; } =
 {

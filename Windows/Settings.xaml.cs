@@ -1,6 +1,7 @@
 ﻿
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp.Windows;
 
@@ -31,7 +32,9 @@ public static class WindowUtility
 	}
 
 }
-
+/// <summary>
+/// Base class for setting tree rendering
+/// </summary>
 public abstract class Setting
 {
 	public Setting(string name)
@@ -39,12 +42,14 @@ public abstract class Setting
 		Name = name;
 	}
 
-	public string Name { get; set; }
-
+	public string Name { get; init; }
+	public bool ExpandedByDefault { get; init; }
 	public Setting[] Children { get; init; } = Array.Empty<Setting>();
 	public virtual void OnClose() { }
 }
-
+/// <summary>
+/// Setting that exists as tree root
+/// </summary>
 public class General : Setting
 {
 	public General() : base("General") { }
@@ -111,7 +116,47 @@ public class ListSetting : Setting, ICommand
 		AddNewRow();
 	}
 }
-
+public class ThresholdSettings : Setting
+{
+	public ThresholdSettings() : base("Warning Thresholds")
+	{
+	}
+	public ObservableItem<uint> MRIReportWarningThreshold
+	{
+		get => Settings.MRIReportWarningThreshold;
+		set => Settings.MRIReportWarningThreshold = value;
+	}
+	public ObservableItem<uint> LPAppointmentWarningThreshold
+	{
+		get => Settings.LPAppointmentWarningThreshold;
+		set => Settings.LPAppointmentWarningThreshold = value;
+	}
+	public ObservableItem<uint> LPReportedWarningThreshold
+	{
+		get => Settings.LPReportedWarningThreshold;
+		set => Settings.LPReportedWarningThreshold = value;
+	}
+	public ObservableItem<uint> EPAppointmentWarningThreshold
+	{
+		get => Settings.EPAppointmentWarningThreshold;
+		set => Settings.EPAppointmentWarningThreshold = value;
+	}
+	public ObservableItem<uint> EPReportedWarningThreshold
+	{
+		get => Settings.EPReportedWarningThreshold;
+		set => Settings.EPReportedWarningThreshold = value;
+	}
+	public ObservableItem<uint> BloodsAppointmentWarningThreshold
+	{
+		get => Settings.BloodsAppointmentWarningThreshold;
+		set => Settings.BloodsAppointmentWarningThreshold = value;
+	}
+	public ObservableItem<uint> BloodsReportedWarningThreshold
+	{
+		get => Settings.BloodsReportedWarningThreshold;
+		set => Settings.BloodsReportedWarningThreshold = value;
+	}
+}
 
 
 public record SettingHolder(Setting setting);
@@ -120,15 +165,15 @@ public record SettingHolder(Setting setting);
 /// </summary>
 public partial class SettingsWindow : Window
 {
-
-
-	Setting root = new General()
+	private Setting root = new General()
 	{
 		Children = new Setting[]
 		{
-			new ListSetting(Settings.ReferralManagers, "Referral Managers","Referral Manager"),
-			new ListSetting( Settings.TransferRegions,"Transfer Regions", "Transfer Region")
-		}
+			new ListSetting(Settings.ReferralManagers,  "Referral Managers",    "Referral Manager"),
+			new ListSetting(Settings.TransferRegions,   "Transfer Regions",     "Transfer Region"),
+			new ThresholdSettings(),
+		},
+		ExpandedByDefault = true,
 	};
 
 
@@ -159,6 +204,7 @@ public partial class SettingsWindow : Window
 		TreeViewItem item = new()
 		{
 			Header = new SettingHolder(setting),
+			IsExpanded = setting.ExpandedByDefault,
 		};
 		foreach (var child in setting.Children)
 			item.Items.Add(GenerateTree(child));
@@ -166,13 +212,13 @@ public partial class SettingsWindow : Window
 		return item;
 	}
 
-
-	void CloseSetting()
+	private void CloseSetting()
 	{
 
 		(SettingContent.Content as Setting)?.OnClose();
 	}
-	void SetSetting(SettingHolder holder)
+
+	private void SetSetting(SettingHolder holder)
 	{
 		CloseSetting();
 
@@ -180,13 +226,13 @@ public partial class SettingsWindow : Window
 		SettingContent.Content = holder.setting;
 	}
 
-	bool choice = false;
+	private bool choice;
 
-	void SettingsWindow_Closing(object sender, CancelEventArgs e)
+	private void SettingsWindow_Closing(object sender, CancelEventArgs e)
 	{
 		CloseSetting();
 		if (choice)
-			Settings.ApplyChanges();
+			_ = Settings.ApplyChanges();
 		else
 			Settings.RevertChanges();
 	}

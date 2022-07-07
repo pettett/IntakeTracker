@@ -1,6 +1,9 @@
 ﻿
 using System.Text.Json;
 using System.IO;
+using System.Data;
+using IntakeTrackerApp.Data;
+
 namespace IntakeTrackerApp.Windows;
 
 /// <summary>
@@ -16,48 +19,35 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 	public string FileType => System.IO.Path.GetExtension(FileName)!;
 	public PatientReferral[]? AllInFile { get; set; }
 
-	public IEnumerable<PatientReferral> Allocation
-	{
-		get => AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive);
-	}
-	public IEnumerable<PatientReferral> Duplicates
-	{
-		get => AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive).Intersect(Data.Context.patientReferrals!);
-	}
-	public IEnumerable<PatientReferral> Uniques
-	{
-		get => AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive).Except(Data.Context.patientReferrals!);
-	}
+	public IEnumerable<PatientReferral> Allocation =>
+		AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive);
+	public IEnumerable<PatientReferral> Duplicates =>
+		AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive).Intersect(Data.Context.patientReferrals!);
+	public IEnumerable<PatientReferral> Uniques =>
+		AllInFile!.Where(r => !r.Archived || r.Archived == ImportArchive).Except(Data.Context.patientReferrals!);
+
 	public int ImportCount
 	{
 		get
 		{
 			NotifyPropertyChanged(nameof(DuplicateCount));
-			return Uniques.Count();
+			return AllInFile == null ? 0 : Uniques.Count();
 		}
 		set { }
 	}
 
 	public int DuplicateCount
 	{
-		get
-		{
-			if (OverrideDuplicates)
-				return 0;
-			else
-
-				return Duplicates.Count();
-		}
+		get => OverrideDuplicates ? 0 : AllInFile == null ? 0 : Duplicates.Count();
 		set { }
 	}
 
 
 	public bool OverrideDuplicates
 	{
-		get => overrideDuplicates; set
+		get => overrideDuplicates; 
+		set
 		{
-
-
 			overrideDuplicates = value;
 
 			NotifyPropertyChanged(nameof(ImportCount));
@@ -83,6 +73,7 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 		AllInFile = FileType switch
 		{
 			".json" => ImportJson(),
+			".xlsx" => ImportSpreadsheet(),
 			_ => null,
 		};
 
@@ -91,7 +82,7 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 			Debug.WriteLine($"Imported from {FileName}");
 		else
 		{
-			Debug.WriteLine($"Error Imported from {FileName}");
+			Debug.WriteLine($"Error Importing from {FileName}");
 		}
 
 
@@ -108,9 +99,12 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 	{
 		base.OnContentRendered(e);
 
-		// Your code here.
+		// Close the window if there was an error
 		if (AllInFile == null)
+		{
+			MessageBox.Show("Error importing file", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			DialogResult = false;
+		}
 	}
 
 
@@ -130,6 +124,32 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 
 		return JsonSerializer.Deserialize<PatientReferral[]>(stream, ExportWindow.jsonOptions);
 	}
+
+	public PatientReferral[]? ImportSpreadsheet()
+	{
+		using Handlers.SpreadsheetHandler spreadsheet = new(FileName, true);
+		PatientReferral[] result = spreadsheet.LoadData<PatientReferral>();
+
+		//PatientReferral[] result = new PatientReferral[t.Rows.Count];
+	//	int i = 0;
+
+	//	var properties = typeof(PatientReferral).GetProperties().Where(x => x.CanWrite && x.CanRead).ToArray();
+
+	//	foreach (DataRow r in t.Rows)
+	//	{
+			//set values for every field
+		//	result[i] = new();
+	//		foreach (var property in properties)
+	//		{
+	//			property.SetValue(result[i], r[property.Name]);
+	//		}
+
+	//		i++;
+	//	}
+
+		return result;
+	}
+
 
 	public void CancelButton_Clicked(object sender, RoutedEventArgs e)
 	{

@@ -9,24 +9,27 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IntakeTrackerApp.Migrations
 {
     [DbContext(typeof(PatientsContext))]
-    [Migration("20210805145737_PreviousCorripondanceNeeded")]
-    partial class PreviousCorripondanceNeeded
+    [Migration("20210910095739_Plans")]
+    partial class Plans
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0-preview.6.21352.1");
+                .HasAnnotation("ProductVersion", "6.0.0-preview.7.21378.4");
 
             modelBuilder.Entity("IntakeTrackerApp.PatientReferral", b =>
                 {
-                    b.Property<ulong>("HospitalNumber")
+                    b.Property<ulong>("NHSNumberKey")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ActiveReferralActions")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Archived")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool?>("BloodTestNeeded")
                         .HasColumnType("INTEGER");
@@ -39,14 +42,54 @@ namespace IntakeTrackerApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ConsultantClinicPlan")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("DateOnReferral")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DateReferralRecieved")
+                    b.Property<DateTime>("DateReferralReceived")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool?>("PreviousCorrispondanceNeeded")
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Height")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LocalHospitalNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("MedicalAppointmentNeeded")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("NursingAppointmentNeeded")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NursingClinicPlan")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreferredContactMethod")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("PreviousCorrespondenceNeeded")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PreviousCorrespondenceSummary")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ReferralType")
                         .IsRequired()
@@ -56,7 +99,18 @@ namespace IntakeTrackerApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("HospitalNumber");
+                    b.Property<string>("TransferRegion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("NHSNumberKey");
 
                     b.ToTable("patientReferrals");
                 });
@@ -65,7 +119,7 @@ namespace IntakeTrackerApp.Migrations
                 {
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "BloodFormsSent", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -75,17 +129,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "BloodTestPlanned", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -95,17 +149,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "BloodTestReported", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -115,17 +169,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "ContactAttempted", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -135,17 +189,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "DateContactMade", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -155,17 +209,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.DateRecord", "DateOfActiveManagement", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -175,17 +229,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.OwnsOne("IntakeTrackerApp.Test", "EP", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Name")
@@ -195,16 +249,16 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<bool?>("Needed")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "ReportedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -214,17 +268,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "RequestedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -234,17 +288,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "TestDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -254,12 +308,12 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.Navigation("ReportedDate")
@@ -274,7 +328,7 @@ namespace IntakeTrackerApp.Migrations
 
                     b.OwnsOne("IntakeTrackerApp.Test", "LP", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Name")
@@ -284,16 +338,16 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<bool?>("Needed")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "ReportedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -303,17 +357,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "RequestedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -323,17 +377,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "TestDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -343,12 +397,12 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.Navigation("ReportedDate")
@@ -363,7 +417,7 @@ namespace IntakeTrackerApp.Migrations
 
                     b.OwnsOne("IntakeTrackerApp.Test", "MRI", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Name")
@@ -373,16 +427,16 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<bool?>("Needed")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "ReportedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -392,17 +446,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "RequestedDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -412,17 +466,17 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.OwnsOne("IntakeTrackerApp.DateRecord", "TestDate", b2 =>
                                 {
-                                    b2.Property<ulong>("TestPatientReferralHospitalNumber")
+                                    b2.Property<ulong>("TestPatientReferralNHSNumberKey")
                                         .HasColumnType("INTEGER");
 
                                     b2.Property<string>("Comment")
@@ -432,12 +486,12 @@ namespace IntakeTrackerApp.Migrations
                                     b2.Property<DateTime?>("Date")
                                         .HasColumnType("Date");
 
-                                    b2.HasKey("TestPatientReferralHospitalNumber");
+                                    b2.HasKey("TestPatientReferralNHSNumberKey");
 
                                     b2.ToTable("patientReferrals");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("TestPatientReferralHospitalNumber");
+                                        .HasForeignKey("TestPatientReferralNHSNumberKey");
                                 });
 
                             b1.Navigation("ReportedDate")
@@ -450,9 +504,9 @@ namespace IntakeTrackerApp.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsOne("IntakeTrackerApp.DateRecord", "PreviousCorrispondanceRecieved", b1 =>
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "MedicalAppointment", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -462,17 +516,17 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
-                    b.OwnsOne("IntakeTrackerApp.DateRecord", "PreviousCorrispondanceRequested", b1 =>
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "NursingAppointment", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("Comment")
@@ -482,36 +536,92 @@ namespace IntakeTrackerApp.Migrations
                             b1.Property<DateTime?>("Date")
                                 .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
-                    b.OwnsOne("IntakeTrackerApp.SummaryInfomation", "Summary", b1 =>
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "PreviousCorrespondenceReceived", b1 =>
                         {
-                            b1.Property<ulong>("PatientReferralHospitalNumber")
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<DateTime>("DateOfBirth")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("FirstName")
+                            b1.Property<string>("Comment")
                                 .IsRequired()
                                 .HasColumnType("TEXT");
 
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("TEXT");
+                            b1.Property<DateTime?>("Date")
+                                .HasColumnType("Date");
 
-                            b1.HasKey("PatientReferralHospitalNumber");
+                            b1.HasKey("PatientReferralNHSNumberKey");
 
                             b1.ToTable("patientReferrals");
 
                             b1.WithOwner()
-                                .HasForeignKey("PatientReferralHospitalNumber");
+                                .HasForeignKey("PatientReferralNHSNumberKey");
+                        });
+
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "PreviousCorrespondenceRequested", b1 =>
+                        {
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Comment")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTime?>("Date")
+                                .HasColumnType("Date");
+
+                            b1.HasKey("PatientReferralNHSNumberKey");
+
+                            b1.ToTable("patientReferrals");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PatientReferralNHSNumberKey");
+                        });
+
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "ProvisinalNursingClinic", b1 =>
+                        {
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Comment")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTime?>("Date")
+                                .HasColumnType("Date");
+
+                            b1.HasKey("PatientReferralNHSNumberKey");
+
+                            b1.ToTable("patientReferrals");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PatientReferralNHSNumberKey");
+                        });
+
+                    b.OwnsOne("IntakeTrackerApp.DateRecord", "ProvisionalConsultantClinic", b1 =>
+                        {
+                            b1.Property<ulong>("PatientReferralNHSNumberKey")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Comment")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTime?>("Date")
+                                .HasColumnType("Date");
+
+                            b1.HasKey("PatientReferralNHSNumberKey");
+
+                            b1.ToTable("patientReferrals");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PatientReferralNHSNumberKey");
                         });
 
                     b.Navigation("BloodFormsSent")
@@ -541,13 +651,22 @@ namespace IntakeTrackerApp.Migrations
                     b.Navigation("MRI")
                         .IsRequired();
 
-                    b.Navigation("PreviousCorrispondanceRecieved")
+                    b.Navigation("MedicalAppointment")
                         .IsRequired();
 
-                    b.Navigation("PreviousCorrispondanceRequested")
+                    b.Navigation("NursingAppointment")
                         .IsRequired();
 
-                    b.Navigation("Summary")
+                    b.Navigation("PreviousCorrespondenceReceived")
+                        .IsRequired();
+
+                    b.Navigation("PreviousCorrespondenceRequested")
+                        .IsRequired();
+
+                    b.Navigation("ProvisinalNursingClinic")
+                        .IsRequired();
+
+                    b.Navigation("ProvisionalConsultantClinic")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

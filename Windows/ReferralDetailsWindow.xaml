@@ -5,11 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IntakeTrackerApp"
         xmlns:c="clr-namespace:IntakeTrackerApp.Controls"
-        MinHeight="200"
-        MinWidth="400"
-        SizeToContent="WidthAndHeight"
-        ResizeMode="CanResizeWithGrip"
-        mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        MinHeight="200"  MinWidth="400"  SizeToContent="WidthAndHeight"
+        ResizeMode="CanResizeWithGrip"  mc:Ignorable="d"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Title="Referral Details" Height="450" Width="278">
     <Window.Resources>
@@ -47,6 +45,8 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -126,11 +126,23 @@
                             Text="{Binding NHSNumber,ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}"
                             Validation.ErrorTemplate="{StaticResource validationError}"
                 TextWrapping="NoWrap" AcceptsReturn="False" AcceptsTab="False"
-                            Margin="6,5,6,15" VerticalContentAlignment="Center"
-                            />
+                            Margin="6,5,6,15" VerticalContentAlignment="Center"  />
 
-            <TextBlock Grid.Row="7" Margin="6,5,6,15"  TextAlignment="Right">Referral Type</TextBlock>
-            <ComboBox Grid.Row="7" Grid.Column="1" Margin="6,5,6,15"   IsEditable="True" Text="{Binding ReferralType, ValidatesOnNotifyDataErrors=True}">
+            <TextBlock Margin="6,5,6,15" Grid.Row="7" TextAlignment="Right">Height (cm):</TextBlock>
+            <xctk:DoubleUpDown Grid.Row="7" Grid.Column="1"
+                     Value="{Binding Height,ValidatesOnNotifyDataErrors=True}"
+                     Validation.ErrorTemplate="{StaticResource validationError}"
+                     Margin="6,5,6,15" VerticalContentAlignment="Center"   />
+            
+            <TextBlock Margin="6,5,6,15" Grid.Row="8" TextAlignment="Right">Weight (kg):</TextBlock>
+            <xctk:DoubleUpDown  Grid.Row="8" Grid.Column="1" 
+                      Value="{Binding Weight,ValidatesOnNotifyDataErrors=True}"
+                      Validation.ErrorTemplate="{StaticResource validationError}"
+                      Margin="6,5,6,15" VerticalContentAlignment="Center"   />
+
+
+            <TextBlock Grid.Row="9" Margin="6,5,6,15"  TextAlignment="Right">Referral Type</TextBlock>
+            <ComboBox Grid.Row="9" Grid.Column="1" Margin="6,5,6,15"   IsEditable="True" Text="{Binding ReferralType, ValidatesOnNotifyDataErrors=True}">
                 <ComboBoxItem>GP</ComboBoxItem>
                 <ComboBoxItem>Neurology – outpatients</ComboBoxItem>
                 <ComboBoxItem>Neurology-attending</ComboBoxItem>
@@ -140,18 +152,18 @@
             </ComboBox>
 
             <TextBlock Visibility="{Binding ShowTransferRegion, Converter={StaticResource cBoolToVis} }" 
-                       Grid.Row="8" Margin="6,5,6,15"  TextAlignment="Right">Transfer Region</TextBlock>
+                       Grid.Row="10" Margin="6,5,6,15"  TextAlignment="Right">Transfer Region</TextBlock>
             <ComboBox Visibility="{Binding ShowTransferRegion, Converter={StaticResource cBoolToVis} }"
-                      Grid.Row="8" Grid.Column="1" Margin="6,5,6,15"   IsEditable="True" 
+                      Grid.Row="10" Grid.Column="1" Margin="6,5,6,15"   IsEditable="True" 
                       Text="{Binding TransferRegion, ValidatesOnNotifyDataErrors=True}" 
                       ItemsSource="{x:Static local:Settings.TransferRegions}"/>
 
-            <Button Grid.Row="9" Grid.Column="0" Margin="4,4,4,4"   
+            <Button Grid.Row="11" Grid.Column="0" Margin="4,4,4,4"   
                     IsCancel="True" Click="cancelButton_Click">
                 Cancel
             </Button>
 
-            <Button Grid.Row="9" Grid.Column="1" Margin="4,4,4,4"    
+            <Button Grid.Row="11" Grid.Column="1" Margin="4,4,4,4"    
                     IsDefault="True" Click="okButton_Click"  Name="Submit">
                 Submit
             </Button>
