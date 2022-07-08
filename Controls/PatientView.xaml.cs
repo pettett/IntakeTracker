@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using LiveCharts.Configurations;
 using IntakeTrackerApp.Extensions;
 using IntakeTrackerApp.Windows;
-using IntakeTrackerApp.Data;
+using IntakeTrackerApp.DataManagement;
 
 namespace IntakeTrackerApp.Controls;
 
@@ -98,8 +98,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	public static Func<double, string> DateTimeFormatter { get; set; } = value => new DateTime((long)value).ToShortDateString();
 	public Func<double, string> EventCatagoryFormatter { get; set; } = Event.EventCatagoryFormatter;
 
-
-	public ObservableCollection<string> Managers => Settings.ReferralManagers;
+	public Vault MainVault { get; set; }
 
 	private class EventSeriesGroup
 	{
@@ -227,12 +226,13 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		XAxis.MaxValue = g.Max;
 		YAxis.MaxValue = Math.Max(1, Event.EventCatagories.Count);
 	}
-	public PatientView(PatientReferral referral) : this()
-	{
+	public PatientView(PatientReferral referral, Vault v) : this(v)
+	{ 
 		Referral = referral;
 	}
-	public PatientView()
+	public PatientView(Vault v)
 	{
+		MainVault = v;
 		//This determines the order of the keys
 		ReferralsEventsCollection = LiveChartsExtensions.GenerateSeries().
 			AddStepLine(ReferralValues, "Referral").
@@ -349,23 +349,23 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 	private void EditPatientDetailsButton_Click(object sender, RoutedEventArgs e)
 	{
-		var referral = new ReferralDetailsWindow(Referral);
+		var referral = new ReferralDetailsWindow(Referral,MainVault);
 
 		var result = referral.ShowDialog();
 		if (result == true)
 		{
-			referral.ApplyDateToReferral(Referral);
+			referral.PopulateReferral(Referral);
 
 			if (Referral.NHSNumberKey != referral.viewModel.FormatNHSNumber())
 			{
 				if (MessageBox.Show("Change NHS Number? Save must take place", "Change NHS Number?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
 				{
 					Data.Context.Remove(Referral);
-					MainWindow.CloseReferral(Referral);
+					VaultViewControl.CloseReferral(Referral);
 					Data.Context.SaveChanges();
 					Referral.NHSNumberKey = referral.viewModel.FormatNHSNumber();
 					Data.Context.Add(Referral);
-					MainWindow.OpenReferral(Referral);
+					VaultViewControl.OpenReferral(Referral);
 				}
 			}
 
@@ -392,7 +392,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 			{
 				Referral.Archived = value;
 
-				MainWindow.Singleton?.view.Refresh();
+				VaultViewControl.Singleton?.view.Refresh();
 			}
 
 			NotifyPropertyChanged();

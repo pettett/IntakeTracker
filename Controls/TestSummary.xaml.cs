@@ -2,21 +2,31 @@
 using System.Collections.ObjectModel;
 using IntakeTrackerApp.Extensions;
 using System.Globalization;
-using IntakeTrackerApp.Data;
+using IntakeTrackerApp.DataManagement;
 
 namespace IntakeTrackerApp.Controls;
-public class CutoffConverter : IValueConverter
+public class CutoffConverter : UserControl, IValueConverter
 {
 	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 	{
-		return ((uint)value) > (Cutoff?.Item ?? 0);
+		return ((uint)value) > Cutoff ;
 	}
 
 	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 	{
 		throw new NotImplementedException();
 	}
-	public ObservableItem<uint>? Cutoff { get; set; }
+
+	public uint Cutoff
+	{
+		get { return (uint)(GetValue(CutoffProperty) ?? 0); }
+		set { SetValue(CutoffProperty, value); }
+	}
+
+	public static readonly DependencyProperty CutoffProperty =
+	DependencyProperty.Register(
+		nameof(Cutoff), typeof(uint), typeof(CutoffConverter)
+		 );
 }
 /// <summary>
 /// Interaction logic for TestSummary.xaml
@@ -31,7 +41,7 @@ public partial class TestSummary : UserControl, INotifyPropertyChanged
 	public Dictionary<string, double> ReferralCatagories { get; set; }
 	public string[] ReferralTypes { get; set; }
 
-
+	public Vault MainVault { get; init; }
 	public Data Context { get; set; } = Data.Singleton;
 	public ObservableCollection<PatientReferral.ReferralEvent> AllAwaitedEvents { get; set; } = new();
 
@@ -107,8 +117,9 @@ public partial class TestSummary : UserControl, INotifyPropertyChanged
 	const uint waitingTimeWidth = 5;
 	public Func<double, string> Formatter { get; set; } = x => $"{waitingTimeWidth * x} - {waitingTimeWidth * (x + 1)-1} Days";
 
-	public TestSummary(TestType TypeFilter, bool IncludeNone)
+	public TestSummary(Vault v, TestType TypeFilter, bool IncludeNone)
 	{
+		MainVault = v;
 		ReferralPoint.Init(); //Initialize referralpoints for mapping
 
 		this.TypeFilter = TypeFilter;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace IntakeTrackerApp.Data
+namespace IntakeTrackerApp.DataManagement
 {
     [Flags]
     public enum TestType
@@ -12,12 +12,12 @@ namespace IntakeTrackerApp.Data
         Bloods = 8,
         All = -1,
     }
-
+    /// <summary>
+    /// Database object for a 3 stage test
+    /// </summary>
     [Owned]
     public class Test : ViewModelBase
     {
-
-
         private readonly string name = "";
 
         private bool? _needed;
@@ -54,7 +54,7 @@ namespace IntakeTrackerApp.Data
             {
                 { Needed: null } => TestStage.Unknown,
                 { Needed: false } => TestStage.Unneeded,
-                { RequestedDate.Date: null } => TestStage.WaitingForRequest,
+                { RequestedDate.Date: null, TestDate.Date: null, ReportedDate.Date: null } => TestStage.WaitingForRequest,
                 { TestDate.Date: null } or { TestDate.HasOccurred: false } => TestStage.WaitingForTest,
                 { ReportedDate.Date: null } => TestStage.WaitingForReport,
                 _ => TestStage.Complete,

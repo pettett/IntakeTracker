@@ -1,7 +1,7 @@
 ﻿
+using IntakeTrackerApp.DataManagement;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
-using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp.Windows;
 
@@ -11,10 +11,10 @@ public static class WindowUtility
 	private const int GWL_STYLE = -16, WS_MAXIMIZEBOX = 0x10000, WS_MINIMIZEBOX = 0x20000;
 
 	[DllImport("user32.dll")]
-	extern private static int GetWindowLong(IntPtr hwnd, int index);
+	private static extern int GetWindowLong(IntPtr hwnd, int index);
 
 	[DllImport("user32.dll")]
-	extern private static int SetWindowLong(IntPtr hwnd, int index, int value);
+	private static extern int SetWindowLong(IntPtr hwnd, int index, int value);
 
 	/// <summary>
 	/// Hides the Minimize and Maximize buttons in a Window. Must be called in the constructor.
@@ -118,44 +118,10 @@ public class ListSetting : Setting, ICommand
 }
 public class ThresholdSettings : Setting
 {
-	public ThresholdSettings() : base("Warning Thresholds")
+	public ThresholdSettings(Vault v) : base("Warning Thresholds")
 	{
 	}
-	public ObservableItem<uint> MRIReportWarningThreshold
-	{
-		get => Settings.MRIReportWarningThreshold;
-		set => Settings.MRIReportWarningThreshold = value;
-	}
-	public ObservableItem<uint> LPAppointmentWarningThreshold
-	{
-		get => Settings.LPAppointmentWarningThreshold;
-		set => Settings.LPAppointmentWarningThreshold = value;
-	}
-	public ObservableItem<uint> LPReportedWarningThreshold
-	{
-		get => Settings.LPReportedWarningThreshold;
-		set => Settings.LPReportedWarningThreshold = value;
-	}
-	public ObservableItem<uint> EPAppointmentWarningThreshold
-	{
-		get => Settings.EPAppointmentWarningThreshold;
-		set => Settings.EPAppointmentWarningThreshold = value;
-	}
-	public ObservableItem<uint> EPReportedWarningThreshold
-	{
-		get => Settings.EPReportedWarningThreshold;
-		set => Settings.EPReportedWarningThreshold = value;
-	}
-	public ObservableItem<uint> BloodsAppointmentWarningThreshold
-	{
-		get => Settings.BloodsAppointmentWarningThreshold;
-		set => Settings.BloodsAppointmentWarningThreshold = value;
-	}
-	public ObservableItem<uint> BloodsReportedWarningThreshold
-	{
-		get => Settings.BloodsReportedWarningThreshold;
-		set => Settings.BloodsReportedWarningThreshold = value;
-	}
+
 }
 
 
@@ -165,22 +131,24 @@ public record SettingHolder(Setting setting);
 /// </summary>
 public partial class SettingsWindow : Window
 {
-	private Setting root = new General()
+	private Setting root;
+	private Vault v;
+
+
+
+	public SettingsWindow(Vault v)
 	{
-		Children = new Setting[]
+		this.v = v;
+		root = new General()
 		{
-			new ListSetting(Settings.ReferralManagers,  "Referral Managers",    "Referral Manager"),
-			new ListSetting(Settings.TransferRegions,   "Transfer Regions",     "Transfer Region"),
-			new ThresholdSettings(),
+			Children = new Setting[]
+		{
+			new ListSetting(v.ReferralManagers,  "Referral Managers",    "Referral Manager"),
+			new ListSetting(v.TransferRegions,   "Transfer Regions",     "Transfer Region"),
+			new ThresholdSettings(v),
 		},
-		ExpandedByDefault = true,
-	};
-
-
-
-
-	public SettingsWindow()
-	{
+			ExpandedByDefault = true,
+		};
 
 		InitializeComponent();
 
@@ -228,19 +196,19 @@ public partial class SettingsWindow : Window
 
 	private bool choice;
 
-	private void SettingsWindow_Closing(object sender, CancelEventArgs e)
+	private async void SettingsWindow_Closing(object sender, CancelEventArgs e)
 	{
 		CloseSetting();
 		if (choice)
-			_ = Settings.ApplyChanges();
+			await v.SaveSettingsChangesAsync();
 		else
-			Settings.RevertChanges();
+			v.LoadSettings();
 	}
 
 
 	private void SettingsView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 	{
-		Debug.WriteLine($"Selected {e.NewValue }");
+		Debug.WriteLine($"Selected {e.NewValue}");
 
 		CloseSetting();
 

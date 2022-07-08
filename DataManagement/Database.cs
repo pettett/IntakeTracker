@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using System.IO;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace IntakeTrackerApp.Data;
+namespace IntakeTrackerApp.DataManagement;
 public class PatientsContext : DbContext
 {
     //pinkly promise this value is not null
@@ -18,13 +14,18 @@ public class PatientsContext : DbContext
 }
 public class PatientsContextFactory : IDesignTimeDbContextFactory<PatientsContext>
 {
+    Vault v;
+
+    public PatientsContextFactory(Vault v)
+    {
+        this.v = v;
+    }
+
     public PatientsContext CreateDbContext(params string[] args)
     {
-        string DbPath = $"{AppDomain.CurrentDomain.BaseDirectory}{System.IO.Path.DirectorySeparatorChar}patientReferrals.db";
-
         return new(
             new DbContextOptionsBuilder<PatientsContext>().
-            UseSqlite($"Data Source={DbPath}").
+            UseSqlite($"Data Source={v.DatabasePath}").
             Options);
     }
 }

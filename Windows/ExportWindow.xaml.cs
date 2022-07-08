@@ -8,7 +8,7 @@ using DocumentFormat.OpenXml;
 using System.Data;
 using System.Linq;
 using System.Globalization;
-using IntakeTrackerApp.Data;
+using IntakeTrackerApp.DataManagement;
 
 namespace IntakeTrackerApp.Windows;
 

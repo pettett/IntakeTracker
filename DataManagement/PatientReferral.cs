@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntakeTrackerApp.Controls;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace IntakeTrackerApp.Data;
+namespace IntakeTrackerApp.DataManagement;
 
 
 public enum TestStage
@@ -111,10 +112,19 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
 
     public string Name => $"{_FirstName} {_LastName}";
 
-    public int Age => DateTime.Compare(DateOfBirth, DateTime.Today) >= 0 ? 0 : DateOnly.FromDateTime(DateTime.Today).
-        AddYears(-DateOfBirth.Year).
-        AddMonths(-DateOfBirth.Month).
-        AddDays(-DateOfBirth.Day).Year;
+    public int Age
+    {
+        get
+        {
+            DateTime zeroTime = new DateTime(1, 1, 1);
+             
+
+            TimeSpan span = DateTime.Today - DateOfBirth;
+            // Because we start at year 1 for the Gregorian
+            // calendar, we must subtract a year here.
+            return (zeroTime + span).Year - 1;
+        }
+}
 
 
     public event EventHandler? CanExecuteChanged;
@@ -124,7 +134,7 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
     }
     public void Execute(object? parameter)
     {
-        MainWindow.Singleton?.AddTab(new ReferralTab(this));
+        VaultViewControl.Singleton?.AddTab(new ReferralTab(this));
     }
     //referral
     public DateTime _DateOnReferral;
@@ -168,8 +178,7 @@ ANA -
 ANCA - 
 Double stranded DNA - 
 Hep B core ab - 
-Hep B surface antigen - 
-Sendaways - 
+Hep B surface antigen -  
 Beta-2 - 
 MOG - 
 MAG - 

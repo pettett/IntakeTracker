@@ -7,8 +7,9 @@ using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using LiveCharts;
+using IntakeTrackerApp.DataManagement;
 
-namespace IntakeTrackerApp.Data;
+namespace IntakeTrackerApp.Controls;
 
 public class ReferralPoint : ObservablePoint
 {
@@ -25,7 +26,7 @@ public class ReferralPoint : ObservablePoint
 
     public void OnClicked()
     {
-        MainWindow.OpenReferral(PointReferral);
+        VaultViewControl.OpenReferral(PointReferral);
     }
 }
 

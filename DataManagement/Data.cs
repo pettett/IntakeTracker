@@ -1,14 +1,13 @@
-﻿using System.IO;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.ObjectModel;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using System.Text.Json;
+using System.Collections.ObjectModel;
 
-namespace IntakeTrackerApp.Data;
+namespace IntakeTrackerApp.DataManagement;
 
 public class ObservableItem<T> : INotifyPropertyChanged
 {
+
     private T item;
 
     public ObservableItem(T item)
@@ -25,106 +24,13 @@ public class ObservableItem<T> : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new("Item"));
         }
     }
+
     public static implicit operator T(ObservableItem<T> i) => i.Item;
 
     public event PropertyChangedEventHandler? PropertyChanged;
-}
-
-public static class Settings
-{
-    public class SettingsJSON
-    {
-        public string[] ReferralManagers { get; set; } = Array.Empty<string>();
-        public string[] TransferRegions { get; set; } = Array.Empty<string>();
-
-        public uint MRIReportWarningThreshold { get; set; } = 21u;
-        public uint LPAppointmentWarningThreshold { get; set; } = 14u;
-        public uint LPReportedWarningThreshold { get; set; } = 28u;
-        public uint EPAppointmentWarningThreshold { get; set; } = 21u;
-        public uint EPReportedWarningThreshold { get; set; } = 2u;
-        public uint BloodsAppointmentWarningThreshold { get; set; } = 7u;
-        public uint BloodsReportedWarningThreshold { get; set; } = 2u;
-
-    }
-
-
-    public static ObservableCollection<string> ReferralManagers { get; set; } = new() { "JH", "JL" };
-    public static ObservableCollection<string> TransferRegions { get; set; } = new() { "Cornwall", "Torbay", "Exeter" };
-    public static ObservableItem<uint> MRIReportWarningThreshold { get; set; } = new(21u);
-    public static ObservableItem<uint> LPAppointmentWarningThreshold { get; set; } = new(14u);
-    public static ObservableItem<uint> LPReportedWarningThreshold { get; set; } = new(28u);
-    public static ObservableItem<uint> EPAppointmentWarningThreshold { get; set; } = new(21u);
-    public static ObservableItem<uint> EPReportedWarningThreshold { get; set; } = new(2u);
-    public static ObservableItem<uint> BloodsAppointmentWarningThreshold { get; set; } = new(7u);
-    public static ObservableItem<uint> BloodsReportedWarningThreshold { get; set; } = new(2u);
-
-    private const string settingsFile = "settings.json";
-
-    public static async Task ApplyChanges()
-    {
-        SettingsJSON s = new();
-        s.ReferralManagers = new string[ReferralManagers.Count];
-        ReferralManagers.CopyTo(s.ReferralManagers, 0);
-
-        s.TransferRegions = new string[TransferRegions.Count];
-        TransferRegions.CopyTo(s.TransferRegions, 0);
-
-        s.MRIReportWarningThreshold = MRIReportWarningThreshold.Item;
-        s.LPAppointmentWarningThreshold = LPAppointmentWarningThreshold.Item;
-        s.LPReportedWarningThreshold = LPReportedWarningThreshold.Item;
-        s.EPAppointmentWarningThreshold = EPAppointmentWarningThreshold.Item;
-        s.EPReportedWarningThreshold = EPReportedWarningThreshold.Item;
-        s.BloodsAppointmentWarningThreshold = BloodsAppointmentWarningThreshold.Item;
-        s.BloodsReportedWarningThreshold = BloodsReportedWarningThreshold.Item;
-
-        using (var file = File.Create(settingsFile))
-        {
-            await JsonSerializer.SerializeAsync(file, s);
-        }
-    }
-    public static void RevertChanges()
-    {
-        if (File.Exists(settingsFile))
-        {
-            using FileStream file = File.OpenRead(settingsFile);
-            Load(JsonSerializer.Deserialize<SettingsJSON>(file));
-        }
-    }
-
-
-    public static async Task LoadAsync()
-    {
-        Debug.WriteLine("Loading settings");
-        if (File.Exists(settingsFile))
-        {
-            using FileStream file = File.OpenRead(settingsFile);
-            Load(await JsonSerializer.DeserializeAsync<SettingsJSON>(file));
-        }
-    }
-
-    private static void Load(SettingsJSON? settings)
-    {
-        if (settings == null) return;
-
-        ReferralManagers.Clear();
-        foreach (var item in settings.ReferralManagers)
-            ReferralManagers.Add(item);
-
-        TransferRegions.Clear();
-        foreach (var item in settings.TransferRegions)
-            TransferRegions.Add(item);
-
-        MRIReportWarningThreshold.Item = settings.MRIReportWarningThreshold;
-        LPAppointmentWarningThreshold.Item = settings.LPAppointmentWarningThreshold;
-        LPReportedWarningThreshold.Item = settings.LPReportedWarningThreshold;
-        EPAppointmentWarningThreshold.Item = settings.EPAppointmentWarningThreshold;
-        EPReportedWarningThreshold.Item = settings.EPReportedWarningThreshold;
-        BloodsAppointmentWarningThreshold.Item = settings.BloodsAppointmentWarningThreshold;
-        BloodsReportedWarningThreshold.Item = settings.BloodsReportedWarningThreshold;
-
-    }
 
 }
+
 
 public class Data
 {
@@ -133,11 +39,7 @@ public class Data
     {
         get
         {
-            if (singleton == null)
-            {
-                singleton = new();
-            }
-            return singleton;
+            return singleton ?? throw new Exception("No data singleton");
         }
     }
 
@@ -162,19 +64,21 @@ public class Data
     public async Task LoadData()
     {
         await context.patientReferrals.Where(p => p.Archived == includeArchive).LoadAsync();
-    }
-    public Data()
-    {
 
-        context = new PatientsContextFactory().CreateDbContext();
+        Debug.WriteLine("Loaded data");
+    }
+    public Data(Vault v)
+    {
+        singleton = this;
+
+        context = new PatientsContextFactory(v).CreateDbContext();
         //Query summaries from all patients
         ReferralSummaries = context.patientReferrals.Local.ToObservableCollection();
 
 
         LoadData();
-        Settings.LoadAsync();
+        v.LoadSettingsAsync();
 
-        Debug.WriteLine("Loaded data");
 
     }
     public void Add(PatientReferral referral)
@@ -182,7 +86,7 @@ public class Data
         ReferralSummaries.Add(referral);
     }
 
-    public void Save()
+    public async Task Save()
     {
         var o = Mouse.OverrideCursor;
 
@@ -195,7 +99,7 @@ public class Data
         {
             try
             {
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 saved = true;
             }
             catch (DbUpdateConcurrencyException ex)
@@ -268,7 +172,7 @@ Overwrite with Proposed Data [YES]:
         }
 
         //Delay for a bit to make sure the user knows that something actually happened
-        Task.Delay(100).Wait();
+        await Task.Delay(100);
 
         Mouse.OverrideCursor = o;
     }

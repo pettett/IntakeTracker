@@ -1,7 +1,7 @@
 ﻿
 
+using IntakeTrackerApp.DataManagement;
 using System.Text.RegularExpressions;
-using IntakeTrackerApp.Data;
 
 namespace IntakeTrackerApp;
 
@@ -19,8 +19,10 @@ public partial class ReferralDetailsWindow : Window
 	}
 
 	public ReferralDetailsWindow(
-		PatientReferral referral)
+		PatientReferral referral,
+		Vault v)
 	{
+		viewModel.v = v;
 		viewModel.HospitalNumber = referral.LocalHospitalNumber;
 		viewModel.ReferralType = referral.ReferralType;
 		viewModel.FirstName = referral.FirstName;
@@ -43,7 +45,7 @@ public partial class ReferralDetailsWindow : Window
 	/// Applies every value EXECPT hospital number which is a key so must be done separately
 	/// </summary>
 	/// <param name="referral"></param>
-	public void ApplyDateToReferral(PatientReferral referral)
+	public void PopulateReferral(PatientReferral referral)
 	{
 		//  referral.HospitalNumber = ulong.Parse(HospitalNumber);
 		referral.FirstName = viewModel.FirstName;
@@ -80,7 +82,7 @@ public partial class ReferralDetailsWindow : Window
 }
 public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 {
-
+	public Vault v { get; set; }
 
 	private string hospitalNumber = "";
 	//Every field needs a containing property with get and set for WPF to bind to it
@@ -195,7 +197,6 @@ public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 
 		ValidateDateOrder(DateOnReferral, nameof(DateOnReferral), DateReferralRecieved, nameof(DateReferralRecieved));
 
-		const int nhsModulo = 11;
 		const int nhsLength = 10;
 
 		string num = ReplaceWhitespace(NHSNumber);
@@ -211,21 +212,7 @@ public class ReferralDetailsViewModel : ErrorTrackerViewModelBase
 
 			if (isNumeric)
 			{
-				//apply the very simple modulo11 checksum
-				static int GetDigit(ulong num, int n) => (int)(num / (ulong)Math.Pow(10, n) % 10);
-
-				//loop through every value except check (index 9)
-
-				//Get digit from numeric number - will be in range  0-9
-
-				//Sum them to later find checkup
-
-				int sum = Enumerable.Range(0, nhsLength).Select(i => GetDigit(numericNHSNum, i) * (10 - i)).Sum();
-
-				//If check is 10 number is always invalid, but value 11 should be 0
-				int check = (nhsModulo - sum % nhsModulo) % nhsModulo;
-
-				checksum = GetDigit(numericNHSNum, nhsModulo - 1) == check;
+				checksum = NHSNum.IsValid(numericNHSNum);
 			}
 
 			nhsNumber = num.Insert(3, " ").Insert(7, " ");

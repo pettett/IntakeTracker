@@ -137,7 +137,7 @@
                     </TextBlock>
                     <ComboBox Grid.Row="1" Grid.Column="1" IsEditable="True" 
                               Text="{Binding Referral.ResponsibleOfActiveManagement, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
-                              ItemsSource="{Binding Managers}" Margin="0,0,0,4" />
+                              ItemsSource="{Binding MainVault.ReferralManagers}" Margin="0,0,0,4" />
 
                     <TextBlock Margin="4,4,8,4" Grid.Row="2" Grid.Column="0">
                         Referral Management/Actions

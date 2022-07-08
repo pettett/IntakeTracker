@@ -1,6 +1,6 @@
 ﻿
 using System.Runtime.CompilerServices;
-using IntakeTrackerApp.Data;
+using IntakeTrackerApp.DataManagement;
 
 namespace IntakeTrackerApp.Controls;
 

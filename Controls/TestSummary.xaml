@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:IntakeTrackerApp.Controls"
              xmlns:l="clr-namespace:IntakeTrackerApp"
+             xmlns:data="clr-namespace:IntakeTrackerApp.DataManagement"
              xmlns:extensions="clr-namespace:IntakeTrackerApp.Extensions"
              mc:Ignorable="d" 
           
@@ -17,13 +18,13 @@
             <Setter Property="Margin" Value="2"/>
         </Style>
 
-        <local:CutoffConverter x:Key="MRIReportWarningThreshold" Cutoff="{x:Static l:Settings.MRIReportWarningThreshold}" />
-        <local:CutoffConverter x:Key="EPAppointmentWarningThreshold" Cutoff="{x:Static l:Settings.EPAppointmentWarningThreshold}" />
-        <local:CutoffConverter x:Key="EPReportedWarningThreshold" Cutoff="{x:Static l:Settings.EPReportedWarningThreshold}" />
-        <local:CutoffConverter x:Key="LPAppointmentWarningThreshold" Cutoff="{x:Static l:Settings.LPAppointmentWarningThreshold}" />
-        <local:CutoffConverter x:Key="LPReportedWarningThreshold" Cutoff="{x:Static l:Settings.LPReportedWarningThreshold}" />
-        <local:CutoffConverter x:Key="BloodsAppointmentWarningThreshold" Cutoff="{x:Static l:Settings.BloodsAppointmentWarningThreshold}" />
-        <local:CutoffConverter x:Key="BloodsReportedWarningThreshold" Cutoff="{x:Static l:Settings.BloodsReportedWarningThreshold}" />
+        <local:CutoffConverter x:Key="MRIReportWarningThreshold"    />
+        <local:CutoffConverter x:Key="EPAppointmentWarningThreshold" />
+        <local:CutoffConverter x:Key="EPReportedWarningThreshold" />
+        <local:CutoffConverter x:Key="LPAppointmentWarningThreshold" />
+        <local:CutoffConverter x:Key="LPReportedWarningThreshold"/>
+        <local:CutoffConverter x:Key="BloodsAppointmentWarningThreshold" />
+        <local:CutoffConverter x:Key="BloodsReportedWarningThreshold"/>
 
         <Style TargetType="TextBlock" x:Key="HoverUnderlineStyle">
             <Style.Triggers>
@@ -72,85 +73,95 @@
 
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}">
-                            <Style.Triggers>
-                                <!-- MRI appointment until MRI reported 21 days -->
+                            <!--    <Style.Triggers>
+                                MRI appointment until MRI reported 21 days 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource MRIReportWarningThreshold}}" />
+                                                 Converter={StaticResource MRIReportWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.MRIReportWarningThreshold }
+                                           
+                                            }" 
+                                                   />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
                                         <Condition Binding="{Binding Test}" Value="MRI" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!--LP requested to LP procedure 14 days -->
+                                LP requested to LP procedure 14 days  
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource LPAppointmentWarningThreshold}}"/>
+                                                 Converter={StaticResource LPAppointmentWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.LPTestWarningThreshold }}"/>
                                         <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
                                         <Condition Binding="{Binding Test}" Value="LP" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!--LP procedure to LP reported 28 days (currently OCB being reported externally and 4/52 delay) -->
+                                LP procedure to LP reported 28 days (currently OCB being reported externally and 4/52 delay) 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource LPReportedWarningThreshold}}" />
+                                                 Converter={StaticResource LPReportedWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.LPReportWarningThreshold }}" />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
                                         <Condition Binding="{Binding Test}" Value="LP" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!-- EP requested to EP appointment 21 days-->
+                                 EP requested to EP appointment 21 days 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource EPAppointmentWarningThreshold}}" />
+                                                 Converter={StaticResource EPAppointmentWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.EPAppointmentWarningThreshold }}" />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
                                         <Condition Binding="{Binding Test}" Value="EP" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!--EP appointment to EP results 2 days (obtained from Nikki Broomfield) -->
+                                EP appointment to EP results 2 days (obtained from Nikki Broomfield) 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource EPReportedWarningThreshold}}" />
+                                                 Converter={StaticResource EPReportedWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.EPReportedWarningThreshold }}" />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
                                         <Condition Binding="{Binding Test}" Value="EP" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!-- Bloods requested to patient attends drop in service 7 days-->
+                                 Bloods requested to patient attends drop in service 7 days 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource BloodsAppointmentWarningThreshold}}" />
+                                                 Converter={StaticResource BloodsAppointmentWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.BloodsAppointmentWarningThreshold }}" />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
                                         <Condition Binding="{Binding Test}" Value="Bloods" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                                <!-- Bloods reported following bloods taken 2/52 (Beta, MOG-AP-4 sent externally and take longer)-->
+                                 Bloods reported following bloods taken 2/52 (Beta, MOG-AP-4 sent externally and take longer) 
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Value="True" 
                                             Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource BloodsReportedWarningThreshold}}" />
+                                                 Converter={StaticResource BloodsReportedWarningThreshold},
+                                            ConverterParameter={Binding Test.MainVault.BloodsReportedWarningThreshold }}" />
                                         <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
                                         <Condition Binding="{Binding Test}" Value="Bloods" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Foreground" Value="Red"/>
                                 </MultiDataTrigger>
-                            </Style.Triggers>
+                            </Style.Triggers> -->
 
                             <Setter Property="Focusable" Value="False"/>
                             <Setter Property="Background" Value="Transparent" />

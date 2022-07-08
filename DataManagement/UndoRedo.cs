@@ -1,7 +1,7 @@
 ﻿
 using System.Reflection;
 
-namespace IntakeTrackerApp.Data;
+namespace IntakeTrackerApp.DataManagement;
 
 public interface ITrackable
 {

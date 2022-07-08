@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using IntakeTrackerApp.DataManagement;
+using System.Globalization;
 using System.Threading;
 using System.Windows.Markup;
 
@@ -10,6 +11,9 @@ namespace IntakeTrackerApp;
 /// </summary>
 public partial class App : Application
 {
+
+	public AppSettings Settings { get; init; }
+
 	public App()
 	{
 		Debug.WriteLine("Loading App");
@@ -21,6 +25,19 @@ public partial class App : Application
 
 		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(App_DispatcherUnhandledException);
 
+		// Load the global app settings
+
+		Settings = new AppSettings();
+
+
+
+	}
+
+	public void SetLastUsedVault(Vault v)
+	{
+		Debug.Print($"New open vault {v.Name}");
+		Settings.Settings.CurrentOpenVault = v.Dir;
+		Settings.SaveSettings();
 	}
 
 	private void App_DispatcherUnhandledException(object sender, UnhandledExceptionEventArgs e)
