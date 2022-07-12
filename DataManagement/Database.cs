@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using System.IO;
 
 namespace IntakeTrackerApp.DataManagement;
 public class PatientsContext : DbContext
@@ -14,18 +15,20 @@ public class PatientsContext : DbContext
 }
 public class PatientsContextFactory : IDesignTimeDbContextFactory<PatientsContext>
 {
-    Vault v;
+    public Vault? v { get; init; }
 
-    public PatientsContextFactory(Vault v)
+    public PatientsContextFactory()
     {
-        this.v = v;
     }
 
     public PatientsContext CreateDbContext(params string[] args)
     {
+        var p = v?.DatabasePath ?? Path.Join(AppDomain.CurrentDomain.BaseDirectory, "patientReferrals.db");
+
+
         return new(
             new DbContextOptionsBuilder<PatientsContext>().
-            UseSqlite($"Data Source={v.DatabasePath}").
+            UseSqlite($"Data Source={p}").
             Options);
     }
 }

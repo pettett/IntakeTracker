@@ -62,6 +62,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 			return Filter == "" || Filter != "" && text.ToLower().Contains(Filter.ToLower());
 		}
 	}
+
 	public class CloseButton : Button
 	{
 		public CloseButton(ITabable tab, VaultViewControl context)
@@ -78,6 +79,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 			base.OnClick();
 		}
 	}
+
 	public static readonly RoutedUICommand
 		NewReferralCmd = new("New Referral command", "NewReferral", typeof(VaultViewControl)),
 		OpenMRICommand = new("Open MRI Command", "OpenMRICommand", typeof(VaultViewControl)),
@@ -88,7 +90,10 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 		ImportCommand = new("Import Command", "ImportCommand", typeof(VaultViewControl)),
 		OpenFileExplorerCommand = new("File Explorer Command", "OpenFileExplorerCommand", typeof(VaultViewControl)),
 		SettingsCommand = new("Settings Command", "SettingsCommand", typeof(VaultViewControl));
-
+	/// <summary>
+	/// Static comparer object to order the list view
+	/// </summary>
+	private static readonly PatientComparer patientComparer = new();
 
 	public UndoCommand UndoCommand { get; set; } = new();
 	public RedoCommand RedoCommand { get; set; } = new();
@@ -165,8 +170,9 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 
 		view = (ListCollectionView)CollectionViewSource.GetDefaultView(PatientsList.ItemsSource);
 		view.Filter = ReferralFilter;
-		view.CustomSort = p;
-		AddTab(new SummaryTab(TestType.All, true));
+		view.CustomSort = patientComparer;
+		// Add the all summary to start
+		//AddTab(new SummaryTab(TestType.All));
 	}
 
 
@@ -213,6 +219,10 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 		}
 	}
 
+	/// <summary>
+	/// Adds a new tab
+	/// </summary>
+	/// <param name="tab"></param>
 	public void AddTab(ITabable tab)
 	{
 
@@ -230,12 +240,11 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 			openTabs.Add(tab);
 			openTabsContent[tab] = item;
 
-			if (tab.CanClose)
+
+			item.Header = new StackPanel()
 			{
-				item.Header = new StackPanel()
-				{
-					Orientation = Orientation.Horizontal,
-					Children =
+				Orientation = Orientation.Horizontal,
+				Children =
 					{
 						new TextBlock()
 						{
@@ -260,14 +269,11 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 							Margin = new Thickness(8, 0, 0, 0),
 						}
 					},
-				};
-			}
-			else
-			{
-				item.Header = new TextBlock() { Text = tab.Header };
-			}
+			};
 
-			item.Content = tab.GenerateContent(MainVault);
+
+
+			item.Content = tab.GenerateContent(MainVault, this);
 
 			TabScreen.Items.Add(item);
 
@@ -303,7 +309,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 
 	public class PatientComparer : IComparer
 	{
-		private bool direction;
+		private bool desending = true;
 		private string comparing = "DateReferralReceived";
 		public string Comparing
 		{
@@ -311,7 +317,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 			{
 				if (comparing == value)
 				{
-					direction = !direction;
+					desending = !desending;
 				}
 				comparing = value;
 			}
@@ -320,7 +326,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 		{
 			if (x is PatientReferral r1 && y is PatientReferral r2)
 			{
-				if (direction)//reverse
+				if (desending)//reverse
 					(r2, r1) = (r1, r2);
 
 
@@ -339,7 +345,6 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 		}
 	}
 
-	private static PatientComparer p = new();
 	/// <summary>
 	/// Change how the referral list is sorted
 	/// </summary>
@@ -348,7 +353,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 	{
 		using (view.DeferRefresh())
 		{
-			p.Comparing = columnName;
+			patientComparer.Comparing = columnName;
 		}
 		view.Refresh();
 	}
@@ -426,7 +431,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 	private void OpenBloods_Executed(object sender, RoutedEventArgs e) => OpenSummary_Executed(TestType.Bloods);
 	private void OpenBloods_CanExecute(object sender, CanExecuteRoutedEventArgs e) => OpenSummary_CanExecute(TestType.Bloods, e);
 
-	private void OpenSummary_Executed(TestType type) => AddTab(new SummaryTab(type, false));
+	private void OpenSummary_Executed(TestType type) => AddTab(new SummaryTab(type));
 
 	private void RandomReferrals_Click(object sender, RoutedEventArgs e)
 	{

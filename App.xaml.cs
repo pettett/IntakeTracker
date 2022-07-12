@@ -33,11 +33,11 @@ public partial class App : Application
 
 	}
 
-	public void SetLastUsedVault(Vault v)
+	public async void SetLastUsedVault(Vault v)
 	{
 		Debug.Print($"New open vault {v.Name}");
 		Settings.Settings.CurrentOpenVault = v.Dir;
-		Settings.SaveSettings();
+		await Settings.SaveSettingsAsync();
 	}
 
 	private void App_DispatcherUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -46,7 +46,7 @@ public partial class App : Application
 
 		// Prevent default unhandled exception processing
 
-		MessageBox.Show($"Unhandled Exception - please send screen shot to Max if this wasn't supposed to happen:\n {e.ExceptionObject}",
+		MessageBox.Show($"Unhandled Exception - please send screen shot to Maxwell if this wasn't supposed to happen:\n {e.ExceptionObject}",
 			"Unhandled Exception", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.None);
 	}
 }

@@ -256,7 +256,7 @@
 
             <!-- Blood test data input-->
             <local:CollapsibleGroupControl Header="Bloods" 
-                                           Enabled="{Binding Referral.BloodTestNeeded,NotifyOnSourceUpdated=True}">
+                                           Enabled="{Binding Referral.Bloods.Needed,NotifyOnSourceUpdated=True}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
@@ -273,20 +273,20 @@
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="0">Blood Forms Sent</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.BloodFormsSent.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.BloodFormsSent.Comment,NotifyOnSourceUpdated=True}"
+                                             SelectedDate="{Binding Referral.Bloods.RequestedDate.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.Bloods.RequestedDate.Comment,NotifyOnSourceUpdated=True}"
                                              Margin="4,4,4,4" Grid.Row="0" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="1">Bloods Planned</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.BloodTestPlanned.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.BloodTestPlanned.Comment,NotifyOnSourceUpdated=True}" 
+                                             SelectedDate="{Binding Referral.Bloods.TestDate.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.Bloods.TestDate.Comment,NotifyOnSourceUpdated=True}" 
                                              Margin="4,4,4,4" Grid.Row="1" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="2">Blood Reported</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.BloodTestReported.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.BloodTestReported.Comment,NotifyOnSourceUpdated=True}"
+                                             SelectedDate="{Binding Referral.Bloods.ReportedDate.Date,NotifyOnSourceUpdated=True}"
+                                             Comment="{Binding Referral.Bloods.ReportedDate.Comment,NotifyOnSourceUpdated=True}"
                                              Margin="4,4,4,4" Grid.Row="2" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="0" Grid.Column="2">Blood Results</TextBlock>

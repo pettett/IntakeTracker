@@ -34,6 +34,7 @@ public class ObservableItem<T> : INotifyPropertyChanged
 
 public class Data
 {
+    private Vault v;
     private static Data? singleton = null;
     public static Data Singleton
     {
@@ -44,11 +45,13 @@ public class Data
     }
 
     public ObservableCollection<PatientReferral> ReferralSummaries { get; set; }
+    private object summeriesLock = new();
 
-    private PatientsContext context;
-    public static PatientsContext Context => Singleton.context;
+    public PatientsContext Referrals { get; set; }
+    public static PatientsContext Context => Singleton.Referrals;
 
     private bool includeArchive = false;
+
     public bool IncludeArchive
     {
         get => includeArchive;
@@ -63,24 +66,36 @@ public class Data
     }
     public async Task LoadData()
     {
-        await context.patientReferrals.Where(p => p.Archived == includeArchive).LoadAsync();
+        // sqlite doesn't support async operations as it is embedded, run it on a thread instead
+        await Task.Run(() =>
+        {
+            Debug.WriteLine("Loading database..");
 
-        Debug.WriteLine("Loaded data");
+            Referrals.patientReferrals.Where(p => p.Archived == includeArchive).Load();
+
+            Debug.WriteLine("Loaded database");
+        });
+
     }
     public Data(Vault v)
     {
         singleton = this;
-
-        context = new PatientsContextFactory(v).CreateDbContext();
+        this.v = v;
+        Referrals = new PatientsContextFactory() { v = v }.CreateDbContext();
         //Query summaries from all patients
-        ReferralSummaries = context.patientReferrals.Local.ToObservableCollection();
+        ReferralSummaries = Referrals.patientReferrals.Local.ToObservableCollection();
+
+        BindingOperations.EnableCollectionSynchronization(ReferralSummaries, summeriesLock);
 
 
-        LoadData();
-        v.LoadSettingsAsync();
-
-
+        LoadDataAsync();
     }
+
+    public async void LoadDataAsync()
+    {
+        await Task.WhenAll(LoadData(), v.LoadSettingsAsync());
+    }
+
     public void Add(PatientReferral referral)
     {
         ReferralSummaries.Add(referral);
@@ -99,7 +114,7 @@ public class Data
         {
             try
             {
-                await context.SaveChangesAsync();
+                await Referrals.SaveChangesAsync();
                 saved = true;
             }
             catch (DbUpdateConcurrencyException ex)
@@ -178,14 +193,14 @@ Overwrite with Proposed Data [YES]:
     }
     public void SaveAndQuit()
     {
-        context.SaveChanges();
+        Referrals.SaveChanges();
         Close();
     }
     public bool IsSaved { get; set; } = false;
 
     public void Close()
     {
-        context.Dispose();
+        Referrals.Dispose();
     }
 
 

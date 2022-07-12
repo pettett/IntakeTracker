@@ -61,7 +61,7 @@ namespace IntakeTrackerApp.DataManagement
             };
         }
 
-        public uint GetDaysSinceLastEvent(DateTime referralReceivedDate)
+        public int GetDaysSinceLastEvent(DateTime referralReceivedDate)
         {
             return GetTestStage() switch
             {
@@ -74,7 +74,6 @@ namespace IntakeTrackerApp.DataManagement
         }
 
 
-
     }
     public static class DateTimeUtility
     {
@@ -83,10 +82,29 @@ namespace IntakeTrackerApp.DataManagement
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        public static uint DaysSince(this DateTime e)
+        public static int DaysSince(this DateTime e)
         {
-            return (uint)(DateOnly.FromDateTime(DateTime.Today).DayNumber - DateOnly.FromDateTime(e).DayNumber);
+            return (DateOnly.FromDateTime(DateTime.Today).DayNumber - DateOnly.FromDateTime(e).DayNumber);
         }
+
+        public static int DaysTo(this DateTime e)
+        {
+            return -e.DaysSince();
+        }
+
+
+        public static string DaysSinceLabel(this DateTime e) => e.DaysSince() switch
+        {
+            0 => "today",
+            1 => "yesterday",
+            int n => $"{n} days ago"
+        };
+        public static string DaysToLabel(this DateTime e) => e.DaysTo() switch
+        {
+            0 => "today",
+            1 => "tomorrow",
+            int n => $"in {n} days"
+        };
     }
 }
 

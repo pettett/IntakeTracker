@@ -140,7 +140,7 @@
                         </GridViewColumn>
 
 
-                        <GridViewColumn >
+                        <GridViewColumn>
                             <GridViewColumnHeader Click="ReferralRecievedColumnHeader_Click" HorizontalContentAlignment="Stretch">
                                 Date Received
                             </GridViewColumnHeader>
@@ -155,7 +155,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                   <!--     <GridViewColumn>
+                   <!-- <GridViewColumn>
                             <GridViewColumnHeader HorizontalContentAlignment="Stretch">
                                 Status
                             </GridViewColumnHeader>

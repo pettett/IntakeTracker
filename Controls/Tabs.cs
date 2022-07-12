@@ -6,9 +6,8 @@ namespace IntakeTrackerApp.Controls;
 /// </summary>
 public interface ITabable
 {
-	bool CanClose { get; }
 	string Header { get; }
-	object GenerateContent(Vault v);
+	object GenerateContent(Vault v, VaultViewControl control);
 	void OnOpened();
 	void Refresh();
 }
@@ -18,10 +17,9 @@ public interface ITabable
 /// <param name="Referral"></param>
 public record ReferralTab(PatientReferral Referral) : ITabable
 {
-	public bool CanClose => true;
 	public string Header => Referral.Name;
 
-	public object GenerateContent(Vault v)
+	public object GenerateContent(Vault v, VaultViewControl control)
 	{
 		return new PatientView(Referral, v);
 	}
@@ -35,15 +33,14 @@ public record ReferralTab(PatientReferral Referral) : ITabable
 	}
 }
 
-public record SummaryTab(TestType TestName, bool IncludeNone) : ITabable
+public record SummaryTab(TestType TestName) : ITabable
 {
-	public bool CanClose => !IncludeNone;
 	public string Header => $"{TestName} Summary";
 
 	private TestSummary? s;
-	public object GenerateContent(Vault v)
+	public object GenerateContent(Vault v, VaultViewControl control)
 	{
-		s = new TestSummary(v, TestName, IncludeNone);
+		s = new TestSummary(v, TestName, control);
 		return s;
 	}
 	public void OnOpened()

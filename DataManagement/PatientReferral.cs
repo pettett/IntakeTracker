@@ -74,7 +74,11 @@ public class DateRecord : ViewModelBase
         _date = null;
         _Comment = "";
     }
-    public uint DaysSince() => _date!.Value.DaysSince();
+
+    public int DaysSince() => _date!.Value.DaysSince();
+    public int DaysTo() => _date!.Value.DaysTo();
+    public string DaysSinceLabel() => _date!.Value.DaysSinceLabel();
+    public string DaysToLabel() => _date!.Value.DaysToLabel();
 
 }
 
@@ -116,15 +120,15 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
     {
         get
         {
-            DateTime zeroTime = new DateTime(1, 1, 1);
-             
+            DateTime zeroTime = new(1, 1, 1);
+
 
             TimeSpan span = DateTime.Today - DateOfBirth;
             // Because we start at year 1 for the Gregorian
             // calendar, we must subtract a year here.
             return (zeroTime + span).Year - 1;
         }
-}
+    }
 
 
     public event EventHandler? CanExecuteChanged;
@@ -164,13 +168,9 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
     public Test MRI { get; set; } = new("MRI");
     public Test LP { get; set; } = new("LP");
     public Test EP { get; set; } = new("EP");
+    public Test Bloods { get; set; } = new("Bloods");
 
-    // blood test
-    public bool? _BloodTestNeeded;
-    public bool? BloodTestNeeded { get => _BloodTestNeeded; set => SetProperty(ref _BloodTestNeeded, value); }
-    public DateRecord BloodFormsSent { get; set; } = new();
-    public DateRecord BloodTestPlanned { get; set; } = new();
-    public DateRecord BloodTestReported { get; set; } = new();
+
 
     public string _BloodTestResults = @"Lupus - 
 Anti-cardiolipin - 
@@ -229,167 +229,213 @@ AP-4 - ";
     public double? _Weight = null;
     public double? Weight { get => _Weight; set => SetProperty(ref _Weight, value); }
 
-    public bool IsAwaited(Test test, TestType t, out ReferralEvent e)
+
+
+
+
+    [NotMapped, JsonIgnore] public string MRISummary => TestSummary(MRI);
+    [NotMapped, JsonIgnore] public string EPSummary => TestSummary(EP);
+    [NotMapped, JsonIgnore] public string LPSummary => TestSummary(LP);
+    /// <summary>
+    /// Generate a summary for this referral relevant to the selected test
+    /// </summary>
+    public string TestSummary(Test t)
     {
-        var stage = test.GetTestStage();
-        e = new();
-        e.r = this;
-        e.Test = t;
-        e.WaitingTime = test.GetDaysSinceLastEvent(DateReferralReceived);
-        e.Stage = stage;
-        e.Display = stage switch
+        if (t.Needed == null || !t.RequestedDate.Booked && !t.TestDate.Booked && !t.ReportedDate.Booked)
         {
-            TestStage.WaitingForReport => $"{test.Name} Report",
-            TestStage.WaitingForTest => test.TestDate.Booked ?
-                $"{test.Name} on {test.TestDate.Date!.Value.ToShortDateString()}" :
-                $"{test.Name} (No Date)",
-            TestStage.WaitingForRequest => $"{test.Name} Request",
-            TestStage.Unknown => $"{test.Name} Triage",
-            _ => string.Empty,
-        };
-
-        e.Comment = stage switch
-        {
-            TestStage.WaitingForReport => test.ReportedDate.Comment,
-            TestStage.WaitingForTest => test.TestDate.Comment,
-            TestStage.WaitingForRequest => test.RequestedDate.Comment,
-            _ => string.Empty,
-        };
-
-
-        if (e.WaitingTime < 0)
-        {
-            //Test has a date but not occurred yet
-
-            //This things precursor is scheduled but has not occurred, so we are waiting for neither
-            return false;
+            // No good information for timing - not known if needed or not requested
+            return $"Waiting since referral {DateReferralReceived.DaysSinceLabel()}";
         }
-
-        return stage != TestStage.Complete && stage != TestStage.Unneeded;
-    }
-
-    public struct ReferralEvent
-    {
-        public ReferralEvent(
-            PatientReferral r, string display, uint waiting, string comment = "",
-            TestType Test = TestType.None, TestStage Stage = TestStage.Unknown)
+        else if (!t.TestDate.Booked)
         {
-            Display = display;
-            WaitingTime = waiting;
-            this.Test = Test;
-            this.r = r;
-            Comment = comment;
-            this.Stage = Stage;
+            return $"Waiting for a test date since request {t.RequestedDate.DaysSinceLabel()}";
         }
-        public PatientReferral r { get; set; }
-        public string Group { get => r.Name; }
-        public string Display { get; set; }
-        public uint WaitingTime { get; set; }
-        public string Comment { get; set; }
-        public TestType Test { get; set; }
-        public TestStage Stage { get; set; }
-        public string DaysLabel
+        else if (!t.TestDate.HasOccurred)
         {
-            get => WaitingTime == 1 ? "Day" : "Days";
-            set { }
+            return $"Waiting for test {t.TestDate.DaysToLabel()}";
+        }
+        else if (!t.ReportedDate.Booked)
+        {
+            return $"Waiting for a report since test {t.TestDate.DaysSinceLabel()}";
+        }
+        else if (!t.ReportedDate.HasOccurred)
+        {
+            return $"Waiting for report {t.ReportedDate.DaysToLabel()}";
+        }
+        else
+        {
+            // Should not get here - one of the above conditions will always be true im *pretty* sure
+            return "invalid state";
         }
     }
 
-    [JsonIgnore, NotMapped]
-    public string QuickStatus
+    //public bool IsAwaited(Test test, TestType t, out ReferralEvent e)
+    //{
+    //    var stage = test.GetTestStage();
+    //    e = new();
+    //    e.r = this;
+    //    e.Test = t;
+    //    e.WaitingTime = test.GetDaysSinceLastEvent(DateReferralReceived);
+    //    e.Stage = stage;
+    //    e.Display = stage switch
+    //    {
+    //        TestStage.WaitingForReport => $"{test.Name} Report",
+    //        TestStage.WaitingForTest => test.TestDate.Booked ?
+    //            $"{test.Name} on {test.TestDate.Date!.Value.ToShortDateString()}" :
+    //            $"{test.Name} (No Date)",
+    //        TestStage.WaitingForRequest => $"{test.Name} Request",
+    //        TestStage.Unknown => $"{test.Name} Triage",
+    //        _ => string.Empty,
+    //    };
+
+    //    e.Comment = stage switch
+    //    {
+    //        TestStage.WaitingForReport => test.ReportedDate.Comment,
+    //        TestStage.WaitingForTest => test.TestDate.Comment,
+    //        TestStage.WaitingForRequest => test.RequestedDate.Comment,
+    //        _ => string.Empty,
+    //    };
+
+
+    //    if (e.WaitingTime < 0)
+    //    {
+    //        //Test has a date but not occurred yet
+
+    //        //This things precursor is scheduled but has not occurred, so we are waiting for neither
+    //        return false;
+    //    }
+
+    //    return stage != TestStage.Complete && stage != TestStage.Unneeded;
+    //}
+
+    //public class ReferralEvent
+    //{
+    //    public ReferralEvent(
+    //        PatientReferral r ,TestType Test = TestType.None)
+    //    {
+    //        Display = display;
+    //        WaitingTime = waiting;
+    //        this.Test = Test;
+    //        this.r = r;
+    //        Comment = comment;
+    //        this.Stage = Stage;
+    //    }
+    //    public PatientReferral r { get; set; }
+    //    public string Group { get => r.Name; }
+    //    public string Display { get; set; }
+    //    public uint WaitingTime { get; set; }
+    //    public string Comment { get; set; }
+    //    public TestType Test { get; set; }
+    //    public TestStage Stage { get; set; }
+    //    public string DaysLabel
+    //    {
+    //        get => WaitingTime == 1 ? "Day" : "Days";
+    //        set { }
+    //    }
+    //}
+
+    //[JsonIgnore, NotMapped]
+    //public string QuickStatus
+    //{
+    //    get
+    //    {
+    //        bool allTestsOccured = MRI.TestDate.HasOccurred && EP.TestDate.HasOccurred && LP.TestDate.HasOccurred;
+    //        bool allTestsReported = MRI.ReportedDate.HasOccurred && EP.ReportedDate.HasOccurred && LP.ReportedDate.HasOccurred;
+
+    //        if (!allTestsOccured)
+    //        {
+    //            return "Awaiting investigations";
+
+    //        }
+    //        else if (allTestsOccured && !allTestsReported)
+    //        {
+    //            //All tests completed, not all results received
+    //            return "Investigations complete; awaiting results";
+    //        }
+    //        else if (MedicalAppointmentNeeded == true && !MedicalAppointment.HasOccurred ||
+    //           NursingAppointmentNeeded == true && !NursingAppointment.HasOccurred)
+    //        {
+    //            return "Awaiting appointment";
+    //        }
+    //        else
+    //        {
+    //            return "Waiting to start treatment";
+    //        }
+    //    }
+    //}
+
+    //public IEnumerable<ReferralEvent> GetAwaitedEvents
+    //{
+    //    get
+    //    {
+    //        if (IsAwaited(MRI, TestType.MRI, out var w))
+    //            yield return w;
+    //        if (IsAwaited(LP, TestType.LP, out w))
+    //            yield return w;
+    //        if (IsAwaited(EP, TestType.EP, out w))
+    //            yield return w;
+
+    //        if (BloodTestNeeded is null)
+    //        {
+    //            yield return new(this, "Blood Test Triage", DateReferralReceived.DaysSince(), Stage: TestStage.Unknown, Test: TestType.Bloods);
+    //        }
+    //        else if (BloodTestNeeded is true)
+    //        {
+    //            if (!BloodFormsSent.HasOccurred)
+    //            {
+    //                yield return new(this, "Blood Test Request", DateReferralReceived.DaysSince(), Stage: TestStage.WaitingForRequest, Test: TestType.Bloods);
+    //            }
+    //            else if (!BloodTestPlanned.HasOccurred)
+    //            {
+    //                yield return new(this, "Blood Test", BloodFormsSent.DaysSince(), Stage: TestStage.WaitingForTest, Test: TestType.Bloods);
+    //            }
+    //            else if (!BloodTestReported.HasOccurred)
+    //            {
+    //                yield return new(this, "Blood Test Results", BloodTestPlanned.DaysSince(), Stage: TestStage.WaitingForReport, Test: TestType.Bloods);
+    //            }
+    //        }
+
+    //        //Show messages for Previous Correspondence
+    //        if (PreviousCorrespondenceNeeded is null)
+    //        {
+    //            yield return new(this, "Previous Correspondence Evaluation", DateReferralReceived.DaysSince());
+    //        }
+    //        else if (PreviousCorrespondenceNeeded is true)
+    //        {
+    //            if (!PreviousCorrespondenceRequested.HasOccurred)
+    //            {
+    //                yield return new(this,
+    //                    "Previous Correspondence Request",
+    //                    DateReferralReceived.DaysSince()
+    //                    );
+    //            }
+    //            else if (!PreviousCorrespondenceReceived.HasOccurred)
+    //            {
+    //                yield return new(this,
+    //                    "Previous Correspondence to arrive",
+    //                    PreviousCorrespondenceRequested.DaysSince()
+    //                    );
+    //            }
+    //        }
+
+
+    //        if (AllTestsComplete())
+    //        {
+    //            yield return new(this, "Diagnostic", 0);
+    //        }
+    //    }
+    //}
+
+    public Test? Test(TestType t) => t switch
     {
-        get
-        {
-            bool allTestsOccured = MRI.TestDate.HasOccurred && EP.TestDate.HasOccurred && LP.TestDate.HasOccurred;
-            bool allTestsReported = MRI.ReportedDate.HasOccurred && EP.ReportedDate.HasOccurred && LP.ReportedDate.HasOccurred;
+        TestType.Bloods => Bloods,
+        TestType.EP => EP,
+        TestType.MRI => MRI,
+        TestType.LP => LP,
+        _ => null
+    };
 
-            if (!allTestsOccured)
-            {
-                return "Awaiting investigations";
-
-            }
-            else if (allTestsOccured && !allTestsReported)
-            {
-                //All tests completed, not all results received
-                return "Investigations complete; awaiting results";
-            }
-            else if (MedicalAppointmentNeeded == true && !MedicalAppointment.HasOccurred ||
-               NursingAppointmentNeeded == true && !NursingAppointment.HasOccurred)
-            {
-                return "Awaiting appointment";
-            }
-            else
-            {
-                return "Waiting to start treatment";
-            }
-        }
-    }
-
-    public IEnumerable<ReferralEvent> GetAwaitedEvents
-    {
-        get
-        {
-            if (IsAwaited(MRI, TestType.MRI, out var w))
-                yield return w;
-            if (IsAwaited(LP, TestType.LP, out w))
-                yield return w;
-            if (IsAwaited(EP, TestType.EP, out w))
-                yield return w;
-
-            if (BloodTestNeeded is null)
-            {
-                yield return new(this, "Blood Test Triage", DateReferralReceived.DaysSince(), Stage: TestStage.Unknown, Test: TestType.Bloods);
-            }
-            else if (BloodTestNeeded is true)
-            {
-                if (!BloodFormsSent.HasOccurred)
-                {
-
-                    yield return new(this, "Blood Test Request", DateReferralReceived.DaysSince(), Stage: TestStage.WaitingForRequest, Test: TestType.Bloods);
-                }
-                else if (!BloodTestPlanned.HasOccurred)
-                {
-                    yield return new(this, "Blood Test", BloodFormsSent.DaysSince(), Stage: TestStage.WaitingForTest, Test: TestType.Bloods);
-                }
-                else if (!BloodTestReported.HasOccurred)
-                {
-                    yield return new(this, "Blood Test Results", BloodTestPlanned.DaysSince(), Stage: TestStage.WaitingForReport, Test: TestType.Bloods);
-                }
-            }
-
-            //Show messages for Previous Correspondence
-            if (PreviousCorrespondenceNeeded is null)
-            {
-                yield return new(this, "Previous Correspondence Evaluation", DateReferralReceived.DaysSince());
-            }
-            else if (PreviousCorrespondenceNeeded is true)
-            {
-                if (!PreviousCorrespondenceRequested.HasOccurred)
-                {
-                    yield return new(this,
-                        "Previous Correspondence Request",
-                        DateReferralReceived.DaysSince()
-                        );
-                }
-                else if (!PreviousCorrespondenceReceived.HasOccurred)
-                {
-                    yield return new(this,
-                        "Previous Correspondence to arrive",
-                        PreviousCorrespondenceRequested.DaysSince()
-                        );
-                }
-            }
-
-
-            if (ReadyForDiagnostics())
-            {
-                yield return new(this, "Diagnostic", 0);
-            }
-        }
-    }
-
-
-    public bool ReadyForDiagnostics()
+    public bool AllTestsComplete()
     {
         var mri = MRI.GetTestStage();
         return mri == TestStage.Complete || mri == TestStage.Unneeded;
@@ -416,7 +462,10 @@ AP-4 - ";
     {
         return !(left == right);
     }
-
+    /// <summary>
+    /// NHS Number is a unique key, so can be used for hashing
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
         return (int)NHSNumberKey;

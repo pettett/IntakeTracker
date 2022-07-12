@@ -10,6 +10,7 @@
              mc:Ignorable="d" 
           
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             d:DataContext="{d:DesignInstance Type=local:TestSummary}"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
@@ -17,7 +18,7 @@
             <Setter Property="Padding" Value="4"/>
             <Setter Property="Margin" Value="2"/>
         </Style>
-
+        <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
         <local:CutoffConverter x:Key="MRIReportWarningThreshold"    />
         <local:CutoffConverter x:Key="EPAppointmentWarningThreshold" />
         <local:CutoffConverter x:Key="EPReportedWarningThreshold" />
@@ -37,200 +38,159 @@
         <Style x:Key="heading" TargetType="Label">
             <Setter Property="FontSize" Value="16" />
         </Style>
+
+
+        <GridViewColumn x:Key="ResponsibleOfActiveManagementColumn" x:Shared="False" Width="50" DisplayMemberBinding="{Binding ResponsibleOfActiveManagement}" >
+            <GridViewColumnHeader>Manager</GridViewColumnHeader>
+        </GridViewColumn>
+
+        <GridView x:Name="MRIReferralSummaryGridView" x:Key="MRIReferralSummaryGridView" x:Shared="False">
+                <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
+                    <GridViewColumnHeader>Name</GridViewColumnHeader>
+                </GridViewColumn>
+            <GridViewColumn Width="300" DisplayMemberBinding="{Binding MRISummary}" >
+                <GridViewColumnHeader>Summary</GridViewColumnHeader>
+            </GridViewColumn>
+        </GridView>
+
+
+        <GridView x:Name="LPReferralSummaryGridView" x:Key="LPReferralSummaryGridView" x:Shared="False">
+            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
+                <GridViewColumnHeader>Name</GridViewColumnHeader>
+            </GridViewColumn>
+            <GridViewColumn  Width="300" DisplayMemberBinding="{Binding LPSummary}" >
+                <GridViewColumnHeader>Summary</GridViewColumnHeader>
+            </GridViewColumn>
+        </GridView>
+
+        <GridView x:Name="EPReferralSummaryGridView" x:Key="EPReferralSummaryGridView" x:Shared="False">
+            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
+                <GridViewColumnHeader>Name</GridViewColumnHeader>
+            </GridViewColumn>
+            <GridViewColumn Width="300" DisplayMemberBinding="{Binding EPSummary}" >
+                <GridViewColumnHeader>Summary</GridViewColumnHeader>
+            </GridViewColumn>
+        </GridView>
+
+        <GridView x:Name="BloodsReferralSummaryGridView" x:Key="BloodsReferralSummaryGridView" x:Shared="False">
+            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
+                <GridViewColumnHeader>Name</GridViewColumnHeader>
+            </GridViewColumn>
+            <GridViewColumn Width="300" DisplayMemberBinding="{Binding BloodsSummary}" >
+                <GridViewColumnHeader>Summary</GridViewColumnHeader>
+            </GridViewColumn>
+        </GridView>
+<!-- Style to choose the correct grid view static resource based on the type of summary we are dealing with -->
+      <Style TargetType="{x:Type ListView}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TestSummaryPath}" 
+                         Value="MRI">
+                    <Setter Property="View" Value="{StaticResource MRIReferralSummaryGridView}" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding TestSummaryPath}" 
+                         Value="EP">
+                    <Setter Property="View" Value="{StaticResource EPReferralSummaryGridView}" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding TestSummaryPath}" 
+                         Value="LP">
+                    <Setter Property="View" Value="{StaticResource LPReferralSummaryGridView}" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding TestSummaryPath}" 
+                         Value="Bloods">
+                    <Setter Property="View" Value="{StaticResource BloodsReferralSummaryGridView}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-
-        <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:TestSummary},  NotifyOnSourceUpdated=True}">
+        <Grid>
+            
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!-- Patient waiting display-->
-            <GroupBox Header="Current Activity">
 
-                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+            <GroupBox x:Name="Filters" Grid.Column="1">
 
-                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="GlobalInfomation" ItemsSource="{Binding AllAwaitedEvents, NotifyOnSourceUpdated=True}" >
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
+                <StackPanel>
+                    <GroupBox >
+                        <GroupBox.Header>
+                            <CheckBox x:Name="FilterManagersCheckbox"   Content="Referral Managers" IsChecked="{Binding FilterMangers.Item, Mode=TwoWay}" />
+                        </GroupBox.Header>
+
+                        <ItemsControl Visibility="{Binding FilterMangers.Item, Converter={StaticResource cBoolToVis}, Mode=TwoWay}" x:Name="FilterManagersSelectionsControl" ItemsSource="{Binding MainVault.ReferralManagers}">
+                            <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel>
-                                        <Separator/>
-                                        <TextBlock Cursor="Hand" Style="{StaticResource HoverUnderlineStyle}" Text="{Binding Name.Name}" >
-                                            <TextBlock.InputBindings>
-                                                <MouseBinding Command="{Binding Name}" MouseAction="LeftClick" />
-                                            </TextBlock.InputBindings>
-                                        </TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox  
+                                    IsChecked="True"
+                                         Checked= "ManagerCheckBox_Checked"
+                                         Unchecked="ManagerCheckBox_Checked"
+                                   Content="{Binding Path=.}"/>
                                     </StackPanel>
-
                                 </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}">
-                            <!--    <Style.Triggers>
-                                MRI appointment until MRI reported 21 days 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource MRIReportWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.MRIReportWarningThreshold }
-                                           
-                                            }" 
-                                                   />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
-                                        <Condition Binding="{Binding Test}" Value="MRI" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                LP requested to LP procedure 14 days  
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource LPAppointmentWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.LPTestWarningThreshold }}"/>
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
-                                        <Condition Binding="{Binding Test}" Value="LP" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                LP procedure to LP reported 28 days (currently OCB being reported externally and 4/52 delay) 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource LPReportedWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.LPReportWarningThreshold }}" />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
-                                        <Condition Binding="{Binding Test}" Value="LP" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                 EP requested to EP appointment 21 days 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource EPAppointmentWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.EPAppointmentWarningThreshold }}" />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
-                                        <Condition Binding="{Binding Test}" Value="EP" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                EP appointment to EP results 2 days (obtained from Nikki Broomfield) 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource EPReportedWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.EPReportedWarningThreshold }}" />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
-                                        <Condition Binding="{Binding Test}" Value="EP" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                 Bloods requested to patient attends drop in service 7 days 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource BloodsAppointmentWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.BloodsAppointmentWarningThreshold }}" />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForTest" />
-                                        <Condition Binding="{Binding Test}" Value="Bloods" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                                 Bloods reported following bloods taken 2/52 (Beta, MOG-AP-4 sent externally and take longer) 
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Value="True" 
-                                            Binding="{Binding WaitingTime, NotifyOnSourceUpdated=True,
-                                                 Converter={StaticResource BloodsReportedWarningThreshold},
-                                            ConverterParameter={Binding Test.MainVault.BloodsReportedWarningThreshold }}" />
-                                        <Condition Binding="{Binding Stage}" Value="WaitingForReport" />
-                                        <Condition Binding="{Binding Test}" Value="Bloods" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="Red"/>
-                                </MultiDataTrigger>
-                            </Style.Triggers> -->
-
-                            <Setter Property="Focusable" Value="False"/>
-                            <Setter Property="Background" Value="Transparent" />
-
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                        <Border  BorderBrush="Transparent"
-                                                 BorderThickness="0"
-                                                 Background="{TemplateBinding Background}">
-                                            <GridViewRowPresenter HorizontalAlignment="Stretch" 
-                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" 
-                                                                  Margin="0" Content="{TemplateBinding Content}"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-
-                    <ListView.View>
-                        <GridView>
-
-                            <GridViewColumn DisplayMemberBinding="{Binding Display}" >
-                                <GridViewColumnHeader>Event</GridViewColumnHeader>
-
-                            </GridViewColumn>
-
-
-                            <GridViewColumn >
-                                <GridViewColumnHeader>Waiting</GridViewColumnHeader>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-
-                                        <TextBlock >
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="{}{0} {1}">
-                                                    <Binding Path="WaitingTime"/>
-                                                    <Binding Path="DaysLabel"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                            <GridViewColumn>
-                                <GridViewColumnHeader>Comment</GridViewColumnHeader>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-
-                                        <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" />
-
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-
-
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </GroupBox>
+                </StackPanel>
+                
+              
 
             </GroupBox>
+            
+        <StackPanel >
+  
+            <!-- Patient waiting display-->
+            <Expander  IsExpanded="False"  Header="Awaiting Results">
+                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="AwaitingResultsList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
+                          ItemsSource="{Binding AwaitingResults, NotifyOnSourceUpdated=True}" >
+
+                </ListView>
+            </Expander>
+
+
+            <!-- Patient waiting display-->
+            <Expander  IsExpanded="False"  Header="Awaiting Test">
+                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="AwaitingTestList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
+                          ItemsSource="{Binding AwaitingTest, NotifyOnSourceUpdated=True}" >
+                  
+                </ListView>
+            </Expander>
+
+
+            <!-- Patient waiting display-->
+            <Expander  IsExpanded="False"  Header="Awaiting Request">
+                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="AwaitingRequestList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
+                          ItemsSource="{Binding AwaitingRequest, NotifyOnSourceUpdated=True}" >
+                </ListView>
+            </Expander>
+
+            <!-- Patient waiting display-->
+            <Expander  IsExpanded="False"  Header="Awaiting Tirage">
+                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="AwaitingTirageList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
+                          ItemsSource="{Binding AwaitingTirage, NotifyOnSourceUpdated=True}"  
+                          />
+
+            </Expander>
+
+            <!--
             <StackPanel Grid.Column="1" Height="auto">
 
 
-                <!-- Referral Types Graph-->
+                <! Referral Types Graph
                 <GroupBox Header="Referral Types">
                     <StackPanel>
 
@@ -262,7 +222,7 @@
                         <TextBlock Text="{Binding MDTClinicLastWeek}"/>
                     </StackPanel>
                 </GroupBox>
-                <!-- Referrals over time graph-->
+                 Referrals over time graph
                 <GroupBox Header="Incoming Referrals over Time">
                     <StackPanel>
 
@@ -285,7 +245,7 @@
                         </lvc:CartesianChart>
                     </StackPanel>
                 </GroupBox>
-                <!-- Waiting time histogram -->
+                Waiting time histogram
                 <GroupBox Header="Waiting Times">
                     <StackPanel>
 
@@ -307,9 +267,10 @@
 
                 </GroupBox>
 
-            </StackPanel>
-        </Grid>
+            </StackPanel>-->
+        </StackPanel>
 
+        </Grid>
     </ScrollViewer>
 
 

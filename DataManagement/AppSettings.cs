@@ -41,7 +41,7 @@ public class AppSettings
 			{ using var file = File.Create(AppSettingsPath); }
 
 			Settings = new();
-			SaveSettings();
+			SaveSettingsAsync().Start();
 		}
 
 		Debug.WriteLine($"Settings located at {AppSettingsPath}");
@@ -61,15 +61,17 @@ public class AppSettings
 		allRecentVaults.CollectionChanged += (_, _) =>
 		{
 			Settings.LastUsedVaults = allRecentVaults.Select(v => v.Dir).ToList();
-			SaveSettings();
+			SaveSettingsAsync().Start();
 		};
 
 	}
-	public void SaveSettings()
+
+
+	public async Task SaveSettingsAsync()
 	{
 		using var file = File.OpenWrite(AppSettingsPath);
 
-		JsonSerializer.Serialize(file, Settings);
+		await JsonSerializer.SerializeAsync(file, Settings);
 	}
 }
 

@@ -1,10 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-
-using System.Collections.ObjectModel;
-using LiveCharts.Configurations;
+﻿using IntakeTrackerApp.DataManagement;
 using IntakeTrackerApp.Extensions;
 using IntakeTrackerApp.Windows;
-using IntakeTrackerApp.DataManagement;
+using LiveCharts.Configurations;
 
 namespace IntakeTrackerApp.Controls;
 
@@ -209,14 +206,8 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		g.AddTest(MRIValues, Referral.DateOfActiveManagement, Referral.MRI, EventCatagory.MRI);
 		g.AddTest(EPValues, Referral.DateOfActiveManagement, Referral.EP, EventCatagory.EP);
 		g.AddTest(LPValues, Referral.DateOfActiveManagement, Referral.LP, EventCatagory.LP);
+		g.AddTest(BloodsValues, Referral.DateOfActiveManagement, Referral.Bloods, EventCatagory.Bloods);
 
-		if (Referral.BloodTestNeeded == true)
-			g.AddEventGroup(EventCatagory.Bloods, BloodsValues).
-				AddEvent("Needed", Referral.DateOfActiveManagement, 0).
-				AddEvent("Forms Sent", Referral.BloodFormsSent, 1.0 / 3.0).
-				AddEvent("Planned", Referral.BloodTestPlanned, 2.0 / 3.0).
-				AddEvent("Reported", Referral.BloodTestReported, 1.0);
-		else BloodsValues.Clear();
 
 		g.AddEventGroup(EventCatagory.Referral, AppointmentValues, false).
 			AddEvent("Medical Appointment", Referral.MedicalAppointment, enabled: Referral.MedicalAppointmentNeeded == true).
@@ -227,7 +218,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		YAxis.MaxValue = Math.Max(1, Event.EventCatagories.Count);
 	}
 	public PatientView(PatientReferral referral, Vault v) : this(v)
-	{ 
+	{
 		Referral = referral;
 	}
 	public PatientView(Vault v)
@@ -296,9 +287,9 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		//Update graph on changes made
 		Referral.PreviousCorrespondenceRequested.PropertyChanged += r;
 		Referral.PreviousCorrespondenceReceived.PropertyChanged += r;
-		Referral.BloodTestPlanned.PropertyChanged += r;
-		Referral.BloodTestReported.PropertyChanged += r;
-		Referral.BloodFormsSent.PropertyChanged += r;
+		Referral.Bloods.TestDate.PropertyChanged += r;
+		Referral.Bloods.ReportedDate.PropertyChanged += r;
+		Referral.Bloods.RequestedDate.PropertyChanged += r;
 
 		Referral.MRI.PropertyChanged += r;
 
@@ -343,13 +334,13 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	private void CreateMailFromTemplateButton_Click(object sender, RoutedEventArgs e)
 	{
 		Debug.WriteLine("creating mail template");
-		LetterTemplateWindow t =  new (this);
+		LetterTemplateWindow t = new(this);
 		t.ShowDialog();
 	}
 
 	private void EditPatientDetailsButton_Click(object sender, RoutedEventArgs e)
 	{
-		var referral = new ReferralDetailsWindow(Referral,MainVault);
+		var referral = new ReferralDetailsWindow(Referral, MainVault);
 
 		var result = referral.ShowDialog();
 		if (result == true)
