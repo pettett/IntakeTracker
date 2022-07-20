@@ -1,14 +1,14 @@
 ﻿
-using System.Text.Json;
-using System.IO;
-using System.Text.Json.Serialization;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml;
-using System.Data;
-using System.Linq;
-using System.Globalization;
 using IntakeTrackerApp.DataManagement;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace IntakeTrackerApp.Handlers;
 
@@ -69,7 +69,7 @@ internal class SpreadsheetHandler : IDisposable
 					while (rows.MoveNext())
 					{
 						var n = spreadsheetTable.NewRow();
-						n.ItemArray = rows.Current.Elements<Cell>().Select(x => GetString(x,sst) ).ToArray();
+						n.ItemArray = rows.Current.Elements<Cell>().Select(x => GetString(x, sst)).ToArray();
 
 						spreadsheetTable.Rows.Add(n);
 					}
@@ -97,7 +97,7 @@ internal class SpreadsheetHandler : IDisposable
 
 	public object? LoadProperty(object? d, DataRow row, Type t, string name)
 	{
-		
+
 
 		if (t == typeof(DateRecord))
 		{
@@ -109,7 +109,7 @@ internal class SpreadsheetHandler : IDisposable
 		{
 			Test test = (Test)d!;
 
-			return new Test(test.Name)
+			return new Test(test.Name, test.Type)
 			{
 				ReportedDate = (DateRecord)LoadProperty(null, row, typeof(DateRecord), $"{name} Reported")!,
 				TestDate = (DateRecord)LoadProperty(null, row, typeof(DateRecord), $"{name} Test")!,
@@ -125,16 +125,18 @@ internal class SpreadsheetHandler : IDisposable
 		else if (t == typeof(bool))
 			return bool.Parse(s);
 		else if (t == typeof(bool?))
-			return s == ""? null : bool.Parse(s);
+			return s == "" ? null : bool.Parse(s);
 
 		else if (t == typeof(DateTime))
 		{
 			if (s == "") return null;
-			else if(DateTime.TryParse(s, out var date))
+			else if (DateTime.TryParse(s, out var date))
 				return date;
-			else if (double.TryParse(s, out var oa)){
+			else if (double.TryParse(s, out var oa))
+			{
 				return DateTime.FromOADate(oa);
-			}else throw new Exception($"Cannot parse {s}");
+			}
+			else throw new Exception($"Cannot parse {s}");
 		}
 		else if (t == typeof(string))
 			return s;

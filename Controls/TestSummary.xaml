@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:IntakeTrackerApp.Controls"
              xmlns:l="clr-namespace:IntakeTrackerApp"
              xmlns:data="clr-namespace:IntakeTrackerApp.DataManagement"
+             xmlns:filter="clr-namespace:IntakeTrackerApp.DataManagement.Filtering"
              xmlns:extensions="clr-namespace:IntakeTrackerApp.Extensions"
              mc:Ignorable="d" 
           
@@ -13,180 +14,154 @@
              d:DataContext="{d:DesignInstance Type=local:TestSummary}"
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <UserControl.Resources>
-        <Style TargetType="GroupBox">
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="Margin" Value="2"/>
-        </Style>
-        <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
-        <local:CutoffConverter x:Key="MRIReportWarningThreshold"    />
-        <local:CutoffConverter x:Key="EPAppointmentWarningThreshold" />
-        <local:CutoffConverter x:Key="EPReportedWarningThreshold" />
-        <local:CutoffConverter x:Key="LPAppointmentWarningThreshold" />
-        <local:CutoffConverter x:Key="LPReportedWarningThreshold"/>
-        <local:CutoffConverter x:Key="BloodsAppointmentWarningThreshold" />
-        <local:CutoffConverter x:Key="BloodsReportedWarningThreshold"/>
+	<UserControl.Resources>
+		<Style TargetType="GroupBox">
+			<Setter Property="Padding" Value="4"/>
+			<Setter Property="Margin" Value="2"/>
+		</Style>
+		<BooleanToVisibilityConverter x:Key="cBoolToVis"/>
+		<local:CutoffConverter x:Key="MRIReportWarningThreshold"    />
+		<local:CutoffConverter x:Key="EPAppointmentWarningThreshold" />
+		<local:CutoffConverter x:Key="EPReportedWarningThreshold" />
+		<local:CutoffConverter x:Key="LPAppointmentWarningThreshold" />
+		<local:CutoffConverter x:Key="LPReportedWarningThreshold"/>
+		<local:CutoffConverter x:Key="BloodsAppointmentWarningThreshold" />
+		<local:CutoffConverter x:Key="BloodsReportedWarningThreshold"/>
+		<local:TestStageConverter x:Key="TestStageConverter"/>
 
-        <Style TargetType="TextBlock" x:Key="HoverUnderlineStyle">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="TextBlock.TextDecorations" Value="Underline" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+		<Style TargetType="TextBlock" x:Key="HoverUnderlineStyle">
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="TextBlock.TextDecorations" Value="Underline" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
 
-        <Style x:Key="heading" TargetType="Label">
-            <Setter Property="FontSize" Value="16" />
-        </Style>
-
-
-        <GridViewColumn x:Key="ResponsibleOfActiveManagementColumn" x:Shared="False" Width="50" DisplayMemberBinding="{Binding ResponsibleOfActiveManagement}" >
-            <GridViewColumnHeader>Manager</GridViewColumnHeader>
-        </GridViewColumn>
-
-        <GridView x:Name="MRIReferralSummaryGridView" x:Key="MRIReferralSummaryGridView" x:Shared="False">
-                <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
-                    <GridViewColumnHeader>Name</GridViewColumnHeader>
-                </GridViewColumn>
-            <GridViewColumn Width="300" DisplayMemberBinding="{Binding MRISummary}" >
-                <GridViewColumnHeader>Summary</GridViewColumnHeader>
-            </GridViewColumn>
-        </GridView>
+		<Style x:Key="heading" TargetType="Label">
+			<Setter Property="FontSize" Value="16" />
+		</Style>
 
 
-        <GridView x:Name="LPReferralSummaryGridView" x:Key="LPReferralSummaryGridView" x:Shared="False">
-            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
-                <GridViewColumnHeader>Name</GridViewColumnHeader>
-            </GridViewColumn>
-            <GridViewColumn  Width="300" DisplayMemberBinding="{Binding LPSummary}" >
-                <GridViewColumnHeader>Summary</GridViewColumnHeader>
-            </GridViewColumn>
-        </GridView>
+		<GridViewColumn  x:Key="ResponsibleOfActiveManagementColumn" Width="50" DisplayMemberBinding="{Binding ResponsibleOfActiveManagement}" >
+			<GridViewColumnHeader>Manager</GridViewColumnHeader>
+		</GridViewColumn>
 
-        <GridView x:Name="EPReferralSummaryGridView" x:Key="EPReferralSummaryGridView" x:Shared="False">
-            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
-                <GridViewColumnHeader>Name</GridViewColumnHeader>
-            </GridViewColumn>
-            <GridViewColumn Width="300" DisplayMemberBinding="{Binding EPSummary}" >
-                <GridViewColumnHeader>Summary</GridViewColumnHeader>
-            </GridViewColumn>
-        </GridView>
+		<GridViewColumn x:Key="TransferRegionColumn"  Width="70" DisplayMemberBinding="{Binding TransferRegion}" >
+			<GridViewColumnHeader>Transfer Region</GridViewColumnHeader>
+		</GridViewColumn>
 
-        <GridView x:Name="BloodsReferralSummaryGridView" x:Key="BloodsReferralSummaryGridView" x:Shared="False">
-            <GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
-                <GridViewColumnHeader>Name</GridViewColumnHeader>
-            </GridViewColumn>
-            <GridViewColumn Width="300" DisplayMemberBinding="{Binding BloodsSummary}" >
-                <GridViewColumnHeader>Summary</GridViewColumnHeader>
-            </GridViewColumn>
-        </GridView>
-<!-- Style to choose the correct grid view static resource based on the type of summary we are dealing with -->
-      <Style TargetType="{x:Type ListView}">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding TestSummaryPath}" 
-                         Value="MRI">
-                    <Setter Property="View" Value="{StaticResource MRIReferralSummaryGridView}" />
-                </DataTrigger>
+		<GridViewColumn x:Key="MRISummaryColumn"  Width="300" DisplayMemberBinding="{Binding MRISummary}" >
+			<GridViewColumnHeader>Summary</GridViewColumnHeader>
+		</GridViewColumn>
 
-                <DataTrigger Binding="{Binding TestSummaryPath}" 
-                         Value="EP">
-                    <Setter Property="View" Value="{StaticResource EPReferralSummaryGridView}" />
-                </DataTrigger>
+		<GridViewColumn x:Key="LPSummaryColumn" Width="300" DisplayMemberBinding="{Binding LPSummary}" >
+			<GridViewColumnHeader>Summary</GridViewColumnHeader>
+		</GridViewColumn>
 
-                <DataTrigger Binding="{Binding TestSummaryPath}" 
-                         Value="LP">
-                    <Setter Property="View" Value="{StaticResource LPReferralSummaryGridView}" />
-                </DataTrigger>
+		<GridViewColumn x:Key="EPSummaryColumn" Width="300" DisplayMemberBinding="{Binding EPSummary}" >
+			<GridViewColumnHeader>Summary</GridViewColumnHeader>
+		</GridViewColumn>
 
-                <DataTrigger Binding="{Binding TestSummaryPath}" 
-                         Value="Bloods">
-                    <Setter Property="View" Value="{StaticResource BloodsReferralSummaryGridView}" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
-    </UserControl.Resources>
-
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid>
-            
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <GroupBox x:Name="Filters" Grid.Column="1">
-
-                <StackPanel>
-                    <GroupBox >
-                        <GroupBox.Header>
-                            <CheckBox x:Name="FilterManagersCheckbox"   Content="Referral Managers" IsChecked="{Binding FilterMangers.Item, Mode=TwoWay}" />
-                        </GroupBox.Header>
-
-                        <ItemsControl Visibility="{Binding FilterMangers.Item, Converter={StaticResource cBoolToVis}, Mode=TwoWay}" x:Name="FilterManagersSelectionsControl" ItemsSource="{Binding MainVault.ReferralManagers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <CheckBox  
-                                    IsChecked="True"
-                                         Checked= "ManagerCheckBox_Checked"
-                                         Unchecked="ManagerCheckBox_Checked"
-                                   Content="{Binding Path=.}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </GroupBox>
-                </StackPanel>
-                
-              
-
-            </GroupBox>
-            
-        <StackPanel >
-  
-            <!-- Patient waiting display-->
-            <Expander  IsExpanded="False"  Header="Awaiting Results">
-                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
-                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="AwaitingResultsList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
-                          ItemsSource="{Binding AwaitingResults, NotifyOnSourceUpdated=True}" >
-
-                </ListView>
-            </Expander>
+		<GridViewColumn x:Key="BloodsSummaryColumn" Width="300" DisplayMemberBinding="{Binding BloodsSummary}" >
+			<GridViewColumnHeader>Summary</GridViewColumnHeader>
+		</GridViewColumn>
 
 
-            <!-- Patient waiting display-->
-            <Expander  IsExpanded="False"  Header="Awaiting Test">
-                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
-                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="AwaitingTestList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
-                          ItemsSource="{Binding AwaitingTest, NotifyOnSourceUpdated=True}" >
-                  
-                </ListView>
-            </Expander>
+
+		<DataTemplate x:Key="StringSetFilterEditor"  DataType="{x:Type filter:HideStringsFilter}" >
+			<GroupBox>
+
+				<GroupBox.Header>
+					<CheckBox Content="{Binding Title}" IsChecked="{Binding Enabled.Item, Mode=TwoWay}" />
+				</GroupBox.Header>
+
+				<ItemsControl x:Name="control" Visibility="{Binding Enabled.Item , Converter={StaticResource cBoolToVis}, Mode=TwoWay}" 
+                                      ItemsSource="{Binding OptionsChecks}">
+					<ItemsControl.ItemTemplate >
+						<DataTemplate>
+							<CheckBox IsChecked="{Binding Checked.Item}"  
+		 
+                                          
+                                   Content="{Binding Value}"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</GroupBox>
+		</DataTemplate>
+
+	</UserControl.Resources>
+
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+		<Grid>
+
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+
+			<GroupBox x:Name="Filters" Grid.Column="1">
+
+				<StackPanel>
+
+					<ContentControl Content="{Binding ManagersFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
+					<ContentControl Content="{Binding RegionsFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
+
+				</StackPanel>
 
 
-            <!-- Patient waiting display-->
-            <Expander  IsExpanded="False"  Header="Awaiting Request">
-                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
-                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="AwaitingRequestList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
-                          ItemsSource="{Binding AwaitingRequest, NotifyOnSourceUpdated=True}" >
-                </ListView>
-            </Expander>
 
-            <!-- Patient waiting display-->
-            <Expander  IsExpanded="False"  Header="Awaiting Tirage">
-                <!-- Listview needs scrolling disabled as the parent scrollviewer contains all the height it needs-->
-                <ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="AwaitingTirageList"  SelectionChanged="AwaitingResultsList_SelectionChanged"
-                          ItemsSource="{Binding AwaitingTirage, NotifyOnSourceUpdated=True}"  
-                          />
 
-            </Expander>
+			</GroupBox>
 
-            <!--
+			<StackPanel >
+
+
+
+
+				<ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
+                          x:Name="AwaitingList"  
+                          ItemsSource="{Binding FilteredReferrals.View, NotifyOnSourceUpdated=True}"
+                          SelectionChanged="AwaitingResultsList_SelectionChanged"
+                          >
+
+					<ListView.View>
+						<GridView x:Name="GridView">
+							<GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
+								<GridViewColumnHeader>Name</GridViewColumnHeader>
+							</GridViewColumn>
+						</GridView>
+					</ListView.View>
+
+					<ListBox.GroupStyle>
+						<GroupStyle>
+							<GroupStyle.Panel>
+								<ItemsPanelTemplate>
+									<VirtualizingStackPanel Orientation="Vertical" />
+								</ItemsPanelTemplate>
+							</GroupStyle.Panel>
+							<GroupStyle.ContainerStyle>
+								<Style TargetType="{x:Type GroupItem}">
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate>
+												<Expander
+                                                    Padding="0"                                           
+                                                    BorderThickness="0"
+                                                    Header="{Binding Name, Converter={StaticResource TestStageConverter}}"
+                                                    IsExpanded="{Binding Name.Expanded}">
+													<ItemsPresenter/>
+												</Expander>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</GroupStyle.ContainerStyle>
+						</GroupStyle>
+					</ListBox.GroupStyle>
+
+				</ListView>
+
+				<!--
             <StackPanel Grid.Column="1" Height="auto">
 
 
@@ -268,10 +243,10 @@
                 </GroupBox>
 
             </StackPanel>-->
-        </StackPanel>
+			</StackPanel>
 
-        </Grid>
-    </ScrollViewer>
+		</Grid>
+	</ScrollViewer>
 
 
 </UserControl>

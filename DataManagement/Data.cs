@@ -26,6 +26,7 @@ public class ObservableItem<T> : INotifyPropertyChanged
     }
 
     public static implicit operator T(ObservableItem<T> i) => i.Item;
+    public static implicit operator ObservableItem<T>(T i) => new(i);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

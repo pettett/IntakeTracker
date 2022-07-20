@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<MinimumPlatformVersion>7.0</MinimumPlatformVersion>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>latest</LangVersion>
 
 		<EnablePreviewFeatures>True</EnablePreviewFeatures>
 	</PropertyGroup>

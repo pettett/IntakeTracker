@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IntakeTrackerApp.DataManagement
 {
@@ -12,13 +13,24 @@ namespace IntakeTrackerApp.DataManagement
         Bloods = 8,
         All = -1,
     }
+
+    public class TestGroup
+    {
+        public TestStage Name { get; set; }
+        public bool Expanded { get; set; }
+    }
+
+
     /// <summary>
     /// Database object for a 3 stage test
     /// </summary>
     [Owned]
     public class Test : ViewModelBase
     {
+        public static Dictionary<TestType, Dictionary<TestStage, TestGroup>> TestGroups { get; set; } = new();
+
         private readonly string name = "";
+
 
         private bool? _needed;
         public DateRecord RequestedDate { get; init; } = new();
@@ -32,14 +44,16 @@ namespace IntakeTrackerApp.DataManagement
             init => name = value;
         }
 
-        public Test(string name)
+        [NotMapped]
+        public TestType Type { get; init; }
+        public Test(string name, TestType type)
         {
             this.name = name;
+            this.Type = type;
         }
 
         public Test()
         {
-            name = Name;
         }
 
         public bool? Needed
@@ -48,22 +62,62 @@ namespace IntakeTrackerApp.DataManagement
             set => SetProperty(ref _needed, value);
         }
 
-        public TestStage GetTestStage()
+        public TestGroup TestGroup
         {
-            return this switch
+            get
             {
-                { Needed: null } => TestStage.Unknown,
-                { Needed: false } => TestStage.Unneeded,
-                { RequestedDate.Date: null, TestDate.Date: null, ReportedDate.Date: null } => TestStage.WaitingForRequest,
-                { TestDate.Date: null } or { TestDate.HasOccurred: false } => TestStage.WaitingForTest,
-                { ReportedDate.Date: null } => TestStage.WaitingForReport,
-                _ => TestStage.Complete,
-            };
+                var s = TestStage;
+
+                if (!TestGroups.ContainsKey(Type))
+                {
+                    // Im never going to write another type definition again at this rate lol
+                    var g = TestGroups[Type] = new();
+                    var group = new TestGroup()
+                    {
+                        Name = s,
+                        Expanded = false
+                    };
+                    g[s] = group;
+                    return group;
+                }
+                else
+                {
+                    var g = TestGroups[Type];
+                    if (g.ContainsKey(s))
+                        return g[s];
+                    else
+                    {
+                        var group = new TestGroup()
+                        {
+                            Name = s,
+                            Expanded = false
+                        };
+                        g[s] = group;
+                        return group;
+                    }
+                }
+
+            }
         }
+
+        public TestStage TestStage =>
+
+             this switch
+             {
+                 { Needed: null } => TestStage.Unknown,
+                 { Needed: false } => TestStage.Unneeded,
+                 { Needed: true, RequestedDate.Booked: false, TestDate.Booked: false, ReportedDate.Booked: false } => TestStage.WaitingForRequest,
+                 { Needed: true, RequestedDate.Booked: true, TestDate.Booked: false } //booked but not tested
+                 or { Needed: true, TestDate.Booked: true, TestDate.HasOccurred: false } //has appointment for test, not always logged in requested date
+                 => TestStage.WaitingForTest,
+                 { Needed: true, ReportedDate.Booked: false } => TestStage.WaitingForReport,
+                 _ => TestStage.Complete,
+             };
+
 
         public int GetDaysSinceLastEvent(DateTime referralReceivedDate)
         {
-            return GetTestStage() switch
+            return TestStage switch
             {
                 TestStage.Unknown => referralReceivedDate.DaysSince(),
                 TestStage.WaitingForRequest => referralReceivedDate.DaysSince(),

@@ -165,10 +165,10 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
     public DateRecord ContactAttempted { get; set; } = new();
     public DateRecord DateContactMade { get; set; } = new();
 
-    public Test MRI { get; set; } = new("MRI");
-    public Test LP { get; set; } = new("LP");
-    public Test EP { get; set; } = new("EP");
-    public Test Bloods { get; set; } = new("Bloods");
+    public Test MRI { get; set; } = new("MRI", TestType.MRI);
+    public Test LP { get; set; } = new("LP", TestType.LP);
+    public Test EP { get; set; } = new("EP", TestType.EP);
+    public Test Bloods { get; set; } = new("Bloods", TestType.Bloods);
 
 
 
@@ -236,6 +236,7 @@ AP-4 - ";
     [NotMapped, JsonIgnore] public string MRISummary => TestSummary(MRI);
     [NotMapped, JsonIgnore] public string EPSummary => TestSummary(EP);
     [NotMapped, JsonIgnore] public string LPSummary => TestSummary(LP);
+    [NotMapped, JsonIgnore] public string BloodsSummary => TestSummary(Bloods);
     /// <summary>
     /// Generate a summary for this referral relevant to the selected test
     /// </summary>
@@ -437,7 +438,7 @@ AP-4 - ";
 
     public bool AllTestsComplete()
     {
-        var mri = MRI.GetTestStage();
+        var mri = MRI.TestStage;
         return mri == TestStage.Complete || mri == TestStage.Unneeded;
     }
 
