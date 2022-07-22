@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:IntakeTrackerApp.Controls"
+             xmlns:filter="clr-namespace:IntakeTrackerApp.DataManagement.Filtering"
              mc:Ignorable="d" 
               d:DataContext="{d:DesignInstance Type=local:VaultViewControl}"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -11,23 +12,12 @@
         <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
 
 
-        <DataTemplate x:Key="SearchableHeaderTemplate">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+        <DataTemplate x:Key="SearchableHeaderTemplate" DataType="{x:Type filter:PrefixFilter}">
+            <StackPanel> 
 
-                <TextBlock>
-                    <TextBlock.Text>
-                        <Binding Path="Heading"/>
-                    </TextBlock.Text>
-                </TextBlock>
-                <TextBox Grid.Row="1" Text="{Binding Path=Filter ,UpdateSourceTrigger=PropertyChanged}"/>
-            </Grid>
+				<TextBlock Text="{Binding Title}"/>
+				<TextBox MinWidth="50" Grid.Row="1" Text="{Binding Path=Prefix.Item ,UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
         </DataTemplate>
 
     </UserControl.Resources>
@@ -109,7 +99,9 @@
 
             <Button Command="{x:Static local:VaultViewControl.NewReferralCmd}" Grid.Row="1" Content="New Referral"/>
 
-            <ListView x:Name="PatientsList" ItemsSource="{Binding Context.ReferralSummaries}" AlternationCount="2"
+			<ListView ScrollViewer.VerticalScrollBarVisibility="Visible"
+				      ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+					  x:Name="PatientsList" ItemsSource="{Binding FilteredReferrals.View}" AlternationCount="2"
                       SelectionMode="Single" MouseDown="PatientsList_MouseDown" VirtualizingStackPanel.IsVirtualizing="True"
                       SelectedItem="{Binding Selected}" Grid.ColumnSpan="2" Margin="0,0,5,0" >
 

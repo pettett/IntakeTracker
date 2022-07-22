@@ -6,15 +6,15 @@ using System.Text.Json.Serialization;
 
 namespace IntakeTrackerApp.DataManagement;
 
-
+[Flags]
 public enum TestStage
 {
-    Unneeded,
-    Unknown,
-    WaitingForRequest,
-    WaitingForTest,
-    WaitingForReport,
-    Complete,
+    Unneeded = 1,
+    Unknown = 2,
+    WaitingForRequest = 4,
+    WaitingForTest = 8,
+    WaitingForReport = 16,
+    Complete = 32,
 }
 
 
@@ -242,32 +242,31 @@ AP-4 - ";
     /// </summary>
     public string TestSummary(Test t)
     {
-        if (t.Needed == null || !t.RequestedDate.Booked && !t.TestDate.Booked && !t.ReportedDate.Booked)
+        TestStage stage = t.TestStage;
+
+        return stage switch
         {
             // No good information for timing - not known if needed or not requested
-            return $"Waiting since referral {DateReferralReceived.DaysSinceLabel()}";
-        }
-        else if (!t.TestDate.Booked)
-        {
-            return $"Waiting for a test date since request {t.RequestedDate.DaysSinceLabel()}";
-        }
-        else if (!t.TestDate.HasOccurred)
-        {
-            return $"Waiting for test {t.TestDate.DaysToLabel()}";
-        }
-        else if (!t.ReportedDate.Booked)
-        {
-            return $"Waiting for a report since test {t.TestDate.DaysSinceLabel()}";
-        }
-        else if (!t.ReportedDate.HasOccurred)
-        {
-            return $"Waiting for report {t.ReportedDate.DaysToLabel()}";
-        }
-        else
-        {
-            // Should not get here - one of the above conditions will always be true im *pretty* sure
-            return "invalid state";
-        }
+            TestStage.Unknown =>
+                $"Waiting for triage since referral {DateReferralReceived.DaysSinceLabel()}",
+
+            TestStage.WaitingForRequest => "Waiting for request",
+
+            TestStage.WaitingForTest when !t.TestDate.Booked =>
+                $"Waiting for a test date since request {t.RequestedDate.DaysSinceLabel()}",
+            TestStage.WaitingForTest when !t.TestDate.HasOccurred =>
+                $"Waiting for test {t.TestDate.DaysToLabel()}",
+
+            TestStage.WaitingForReport when !t.ReportedDate.Booked =>
+                $"Waiting for a report since test {t.TestDate.DaysSinceLabel()}",
+            TestStage.WaitingForReport when !t.ReportedDate.HasOccurred =>
+                $"Waiting for report {t.ReportedDate.DaysToLabel()}",
+            _ =>
+                "invalid state"
+
+        };
+
+
     }
 
     //public bool IsAwaited(Test test, TestType t, out ReferralEvent e)

@@ -75,7 +75,7 @@
 					<CheckBox Content="{Binding Title}" IsChecked="{Binding Enabled.Item, Mode=TwoWay}" />
 				</GroupBox.Header>
 
-				<ItemsControl x:Name="control" Visibility="{Binding Enabled.Item , Converter={StaticResource cBoolToVis}, Mode=TwoWay}" 
+				<ItemsControl x:Name="control" Visibility="{Binding Enabled.Item , Converter={StaticResource cBoolToVis}}" 
                                       ItemsSource="{Binding OptionsChecks}">
 					<ItemsControl.ItemTemplate >
 						<DataTemplate>
@@ -89,43 +89,74 @@
 			</GroupBox>
 		</DataTemplate>
 
+		<DataTemplate x:Key="PrefixFilterEditor"  DataType="{x:Type filter:PrefixFilter}" >
+			<GroupBox>
+				<GroupBox.Header>
+					<CheckBox Content="{Binding Title}" IsChecked="{Binding Enabled.Item, Mode=TwoWay}" />
+				</GroupBox.Header>
+
+				<TextBox  Visibility="{Binding Enabled.Item , Converter={StaticResource cBoolToVis}}"  
+						  Text="{Binding Prefix.Item, UpdateSourceTrigger=PropertyChanged}"/>
+			</GroupBox>
+		</DataTemplate>
+
 	</UserControl.Resources>
 
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 		<Grid>
 
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="3*"/>
 			</Grid.ColumnDefinitions>
 
-			<GroupBox x:Name="Filters" Grid.Column="1">
+			<GridSplitter Grid.Column="1"  HorizontalAlignment="Center" ShowsPreview="True" Width="5"/>
 
-				<StackPanel>
+			<GroupBox Grid.Column="0" Header="Filters" x:Name="Filters" >
 
-					<ContentControl Content="{Binding ManagersFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
-					<ContentControl Content="{Binding RegionsFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"  />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto"/> 
+					</Grid.RowDefinitions>
 
-				</StackPanel>
+					<ContentControl Content="{Binding FirstNameFilter}"   ContentTemplate="{StaticResource PrefixFilterEditor}"  />
+					<ContentControl Grid.Column="1" Content="{Binding LastNameFilter}"   ContentTemplate="{StaticResource PrefixFilterEditor}"  />
+					
+					<ContentControl Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding ManagersFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
+					<ContentControl Grid.Row="2" Grid.ColumnSpan="2" Content="{Binding RegionsFilter}"   ContentTemplate="{StaticResource StringSetFilterEditor}"  />
+				
+					
+
+				</Grid>
 
 
 
 
 			</GroupBox>
 
-			<StackPanel >
+
+			<GroupBox Grid.Column="2" Header="Results" >
 
 
 
 
-				<ListView ScrollViewer.VerticalScrollBarVisibility="Disabled" extensions:ListboxExtensions.IgnoreScroll="True" 
-                          x:Name="AwaitingList"  
+				<ListView ScrollViewer.VerticalScrollBarVisibility="Visible"
+						  ScrollViewer.HorizontalScrollBarVisibility="Hidden"  AlternationCount="2"
+						  x:Name="AwaitingList" VirtualizingStackPanel.IsVirtualizing="True"  
+							VirtualizingStackPanel.VirtualizationMode="Recycling"
                           ItemsSource="{Binding FilteredReferrals.View, NotifyOnSourceUpdated=True}"
                           SelectionChanged="AwaitingResultsList_SelectionChanged"
                           >
 
 					<ListView.View>
-						<GridView x:Name="GridView">
+					<GridView x:Name="GridView"  AllowsColumnReorder="true">
 							<GridViewColumn Width="150" DisplayMemberBinding="{Binding Name}" >
 								<GridViewColumnHeader>Name</GridViewColumnHeader>
 							</GridViewColumn>
@@ -243,10 +274,9 @@
                 </GroupBox>
 
             </StackPanel>-->
-			</StackPanel>
+			</GroupBox>
 
-		</Grid>
-	</ScrollViewer>
+		</Grid> 
 
 
 </UserControl>

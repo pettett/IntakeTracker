@@ -15,7 +15,16 @@ namespace IntakeTrackerApp.DataManagement.Filtering;
 /// <param name="Map"></param>
 public record MapFilter<P, Q>(IFilter<Q> MappedFilter, Func<P, Q> Map) : IFilter<P>
 {
+	public ObservableItem<bool> Enabled => MappedFilter.Enabled;
+
 	public bool Filter(P val) => MappedFilter.Filter(Map(val));
 	public void AddChangedListener(Action listener) => MappedFilter.AddChangedListener(listener);
 	public void RemoveChangedListener(Action listener) => MappedFilter.RemoveChangedListener(listener);
+}
+
+public record ReferralMap<Q> : MapFilter<PatientReferral, Q>
+{
+	public ReferralMap(IFilter<Q> MappedFilter, Func<PatientReferral, Q> Map) : base(MappedFilter, Map)
+	{
+	}
 }

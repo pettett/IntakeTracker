@@ -383,7 +383,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 			{
 				Referral.Archived = value;
 
-				VaultViewControl.Singleton?.view.Refresh();
+				VaultViewControl.Singleton?.FilteredReferrals.View.Refresh();
 			}
 
 			NotifyPropertyChanged();

@@ -4,6 +4,7 @@ using Microsoft.Win32;
 namespace IntakeTrackerApp.Controls;
 
 using IntakeTrackerApp.DataManagement;
+using IntakeTrackerApp.DataManagement.Filtering;
 using System.Diagnostics.CodeAnalysis;
 using Windows;
 
@@ -36,32 +37,7 @@ using Windows;
 /// </summary>
 public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 {
-	public class FilteredColumnHeading : DependencyObject
-	{
-		public static readonly DependencyProperty FilterProperty = DependencyProperty.Register(
-			"Filter", typeof(string), typeof(FilteredColumnHeading), new FrameworkPropertyMetadata("")
-			{
-				BindsTwoWayByDefault = true,
-				DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-				PropertyChangedCallback = FilterChanged,
-			});
-		public static void FilterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-		{
-			//Debug.WriteLine($"Filtered, {((FilteredColumnHeading)d).Filter}");
-			Singleton?.view.Refresh();
-		}
 
-		public string Heading { get; set; } = "";
-		public string Filter
-		{
-			get => (string)GetValue(FilterProperty); set => SetValue(FilterProperty, value);
-		}
-
-		public bool FilterText(string text)
-		{
-			return Filter == "" || Filter != "" && text.ToLower().Contains(Filter.ToLower());
-		}
-	}
 
 	public class CloseButton : Button
 	{
@@ -100,8 +76,8 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 
 	public double PopupHeight => Height;
 
+	public ObservableFilteredCollection<PatientReferral> FilteredReferrals { get; init; }
 
-	public ListCollectionView view;
 	public Data Context { get; set; }
 
 	private Dictionary<ITabable, TabItem> openTabsContent = new();
@@ -138,8 +114,8 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 #endif
 	}
 
-	public FilteredColumnHeading FirstNameColumn { get; set; } = new() { Heading = "First Name" };
-	public FilteredColumnHeading LastNameColumn { get; set; } = new() { Heading = "Last Name" };
+	public PrefixFilter FirstNameColumn { get; set; } = new("First Name");
+	public PrefixFilter LastNameColumn { get; set; } = new("Last Name");
 
 	public bool IncludeArchived
 	{
@@ -149,7 +125,7 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 			if (!value || value && MessageBox.Show("Include Archive", "Are you sure you want to include archived data?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
 			{
 				Context.IncludeArchive = value;
-				view.Refresh();
+				FilteredReferrals.RefreshAsync();
 			}
 		}
 	}
@@ -162,33 +138,28 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 		DataContext = this;
 		//LoadAllPatients();
 		Context = v.LoadContext();
+
+		FilteredReferrals = new(MainVault.Context.ReferralSummaries,
+			new ReferralMap<string>(FirstNameColumn, x => x.FirstName),
+			new ReferralMap<string>(LastNameColumn, x => x.LastName)
+			);
+		FirstNameColumn.Enabled.Item = true;
+		LastNameColumn.Enabled.Item = true;
+
 		Debug.WriteLine("Loading Main Window...");
+
 		InitializeComponent();
 		Debug.WriteLine("Loaded Main Window...");
 
 		TabScreen.SelectionChanged += TabScreen_SelectionChanged;
 
-		view = (ListCollectionView)CollectionViewSource.GetDefaultView(PatientsList.ItemsSource);
-		view.Filter = ReferralFilter;
-		view.CustomSort = patientComparer;
+		FilteredReferrals.View.CustomSort = patientComparer;
 		// Add the all summary to start
 		//AddTab(new SummaryTab(TestType.All));
 	}
 
 
 
-	/// <summary>
-	/// Apply filters to an object (likely called from the list view)
-	/// </summary>
-	/// <param name="item"></param>
-	/// <returns></returns>
-	private bool ReferralFilter(object item)
-	{
-		return item is PatientReferral r &&
-				(!r.Archived || (r.Archived && IncludeArchived)) &&
-				FirstNameColumn.FilterText(r.FirstName) &&
-				LastNameColumn.FilterText(r.LastName);
-	}
 
 
 
@@ -351,11 +322,9 @@ public partial class VaultViewControl : UserControl, INotifyPropertyChanged
 	/// <param name="columnName">The selected column to sort by</param>
 	public void ChangeSortingState(string columnName)
 	{
-		using (view.DeferRefresh())
-		{
-			patientComparer.Comparing = columnName;
-		}
-		view.Refresh();
+
+		patientComparer.Comparing = columnName;
+		FilteredReferrals.View.Refresh();
 	}
 
 	public void ReferralRecievedColumnHeader_Click(object sender, RoutedEventArgs e) => ChangeSortingState("DateReferralReceived");

@@ -61,7 +61,9 @@ namespace IntakeTrackerApp.DataManagement
             get => _needed;
             set => SetProperty(ref _needed, value);
         }
-
+        /// <summary>
+        /// Get the group this test belongs in - just the test stage along with a record of if the group has been expanded
+        /// </summary>
         public TestGroup TestGroup
         {
             get
@@ -99,7 +101,9 @@ namespace IntakeTrackerApp.DataManagement
 
             }
         }
-
+        /// <summary>
+        /// Get the current stage of the test
+        /// </summary>
         public TestStage TestStage =>
 
              this switch

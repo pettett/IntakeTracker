@@ -45,10 +45,10 @@ public record SummaryTab(TestType TestName) : ITabable
 	}
 	public void OnOpened()
 	{
-		s?.FilteredReferrals.Refresh();
+		s?.FilteredReferrals.RefreshAsync();
 	}
 	public void Refresh()
 	{
-		s?.FilteredReferrals.Refresh();
+		s?.FilteredReferrals.RefreshAsync();
 	}
 }

@@ -33,16 +33,27 @@ public class CutoffConverter : UserControl, IValueConverter
 
 public class TestStageConverter : IValueConverter
 {
+	public TestType test;
+	public TestStageConverter()
+	{
+	}
+	public TestStageConverter(TestType test)
+	{
+		this.test = test;
+	}
+
 	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 	{
-		return ((TestGroup)value).Name switch
-		{
-			TestStage.Unknown => "Awaiting Tirage",
-			TestStage.WaitingForReport => "Awaiting Results",
-			TestStage.WaitingForTest => "Awaiting Test",
-			TestStage.WaitingForRequest => "Awaiting Request",
-			_ => ""
-		};
+		if (value is TestGroup g)
+			return g.Name switch
+			{
+				TestStage.Unknown => $"Awaiting {test} Triage",
+				TestStage.WaitingForReport => $"Awaiting {test} Results",
+				TestStage.WaitingForTest => $"Awaiting {test} Test",
+				TestStage.WaitingForRequest => $"Awaiting {test} Request",
+				_ => ""
+			};
+		return "";
 	}
 
 	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -91,8 +102,10 @@ public partial class TestSummary : UserControl, INotifyPropertyChanged
 
 	public ObservableFilteredCollection<PatientReferral> FilteredReferrals { get; init; }
 
-	public HideStringsFilter ManagersFilter { get; set; }
-	public HideStringsFilter RegionsFilter { get; set; }
+	public HideStringsFilter ManagersFilter { get; init; }
+	public HideStringsFilter RegionsFilter { get; init; }
+	public PrefixFilter FirstNameFilter { get; init; } = new("First Name");
+	public PrefixFilter LastNameFilter { get; init; } = new("Last Name");
 
 	//public static Func<double, string> DateOnlyFormatter { get; set; } = value => DateOnly.FromDayNumber((int)value).ToShortDateString();
 	//public static Func<double, string> DateTimeFormatter { get; set; } = value => new DateTime((long)value).ToShortDateString();
@@ -168,28 +181,45 @@ public partial class TestSummary : UserControl, INotifyPropertyChanged
 		this.TypeFilter = TypeFilter;
 		MainVault = v;
 
+
+
 		ManagersFilter = CreateStringFilter(MainVault.ReferralManagers, "Referral Manager", "ResponsibleOfActiveManagementColumn");
 
 		RegionsFilter = CreateStringFilter(MainVault.TransferRegions, "Transfer Regions", "TransferRegionColumn");
 
+
 		FilteredReferrals = new(
 			v.Context.ReferralSummaries,
-			new MapFilter<PatientReferral, string?>(ManagersFilter, x => x.ResponsibleOfActiveManagement),
-			new MapFilter<PatientReferral, string?>(RegionsFilter, x => x.TransferRegion)
+			new TestStageFilter(TypeFilter, TestStage.WaitingForReport | TestStage.WaitingForRequest | TestStage.WaitingForTest | TestStage.Unknown),
+			new ReferralMap<string?>(ManagersFilter, x => x.ResponsibleOfActiveManagement),
+			new ReferralMap<string?>(RegionsFilter, x => x.TransferRegion),
+			new ReferralMap<string>(FirstNameFilter, x => x.FirstName),
+			new ReferralMap<string>(LastNameFilter, x => x.LastName)
 			);
 
-		FilteredReferrals.View.GroupDescriptions.Add(new PropertyGroupDescription("MRI.TestGroup"));
+		var testName = TypeFilter switch
+		{
+			TestType.MRI => "MRI",
+			TestType.LP => "LP",
+			TestType.EP => "EP",
+			TestType.Bloods => "Bloods",
+			_ => throw new InvalidEnumArgumentException("Invalid test type"),
+		};
 
-		FilteredReferrals.View.SortDescriptions.Add(new SortDescription("MRI.TestStage", ListSortDirection.Descending));
+		FilteredReferrals.View.GroupDescriptions.Add(new PropertyGroupDescription($"{testName}.TestGroup"));
+
+		FilteredReferrals.View.SortDescriptions.Add(new SortDescription($"{testName}.TestStage", ListSortDirection.Descending));
 		FilteredReferrals.View.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
 
 
 		InitializeComponent();
 
+		((TestStageConverter)Resources["TestStageConverter"]).test = TypeFilter;
+
 
 		var testSummaryPath = TypeFilter switch
 		{
-			TestType.MRI => "BloodsSummaryColumn",
+			TestType.MRI => "MRISummaryColumn",
 			TestType.LP => "LPSummaryColumn",
 			TestType.EP => "EPSummaryColumn",
 			TestType.Bloods => "BloodsSummaryColumn",
