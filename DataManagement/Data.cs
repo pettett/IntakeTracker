@@ -72,7 +72,7 @@ public class Data
         {
             Debug.WriteLine("Loading database..");
 
-            Referrals.patientReferrals.Where(p => p.Archived == includeArchive).Load();
+            Referrals.patientReferrals.Where(p => p.Archived == includeArchive).ToList().ForEach(x => x.Init());
 
             Debug.WriteLine("Loaded database");
         });

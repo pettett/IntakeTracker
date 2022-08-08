@@ -8,7 +8,6 @@
             >
     <Application.Resources>
 
-        
         <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
 
         <Style TargetType="controls:CollapsibleGroupControl">

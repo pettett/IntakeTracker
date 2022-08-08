@@ -31,12 +31,9 @@
 
         <CommandBinding Command="{x:Static local:VaultViewControl.ImportCommand}" Executed="Import_Executed" />
         <CommandBinding Command="{x:Static local:VaultViewControl.ExportCommand}" Executed="Export_Executed" />
-        <CommandBinding Command="{x:Static local:VaultViewControl.OpenFileExplorerCommand}" Executed="OpenFileExplorerCommand_Executed" />
-
-        <CommandBinding Command="{x:Static local:VaultViewControl.SettingsCommand}" Executed="OpenSettings_Executed" />
-
-
-        <CommandBinding Command="Save" Executed="Save_Executed" />
+		<CommandBinding Command="{x:Static local:VaultViewControl.OpenFileExplorerCommand}" Executed="OpenFileExplorerCommand_Executed" />
+		<CommandBinding Command="{x:Static local:VaultViewControl.SettingsCommand}" Executed="OpenSettings_Executed" />
+		<CommandBinding Command="Save" Executed="Save_Executed" />
 
     </UserControl.CommandBindings>
 

@@ -45,7 +45,7 @@ internal class SpreadsheetHandler : IDisposable
 		return "";
 	}
 
-	public T[] LoadData<T>() where T : new()
+	public T[] LoadData<T>(Func<T> constructor)
 	{
 		DataTable spreadsheetTable = new();
 
@@ -84,7 +84,7 @@ internal class SpreadsheetHandler : IDisposable
 
 		for (int i = 0; i < t.Length; i++)
 		{
-			t[i] = new();
+			t[i] = constructor();
 			foreach (var p in properties)
 			{
 				p.SetValue(t[i], LoadProperty(p.GetValue(t[i]), spreadsheetTable.Rows[i], p.PropertyType, p.Name));
@@ -109,7 +109,7 @@ internal class SpreadsheetHandler : IDisposable
 		{
 			Test test = (Test)d!;
 
-			return new Test(test.Name, test.Type)
+			return new Test(test.Type)
 			{
 				ReportedDate = (DateRecord)LoadProperty(null, row, typeof(DateRecord), $"{name} Reported")!,
 				TestDate = (DateRecord)LoadProperty(null, row, typeof(DateRecord), $"{name} Test")!,

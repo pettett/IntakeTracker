@@ -21,6 +21,8 @@ public record ReferralTab(PatientReferral Referral) : ITabable
 
 	public object GenerateContent(Vault v, VaultViewControl control)
 	{
+		ArgumentNullException.ThrowIfNull(Referral);
+
 		return new PatientView(Referral, v);
 	}
 	public void OnOpened()

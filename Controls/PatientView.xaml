@@ -18,7 +18,7 @@
         <StackPanel x:Name="ReferralStack" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PatientView}}}">
             <!-- Details and referral information-->
             <DockPanel>
-                <StackPanel>
+                <StackPanel Margin="4">
 
                     <TextBlock>
                         <TextBlock.Text>
@@ -77,25 +77,30 @@
                         </TextBlock.Text>
                     </TextBlock>
 
-                    <TextBlock Text="{Binding Referral.Height, StringFormat=Height: {0}cm, NotifyOnSourceUpdated=True}"/>
-                    <TextBlock Text="{Binding Referral.Weight, StringFormat=Weight: {0}kg, NotifyOnSourceUpdated=True}"/>
+                    <TextBlock Text="{Binding Referral.Height, StringFormat=Height: {0:0}cm, NotifyOnSourceUpdated=True}"/>
+                    <TextBlock Text="{Binding Referral.Weight, StringFormat=Weight: {0:0}kg, NotifyOnSourceUpdated=True}"/>
 
                     <CheckBox  IsChecked="{Binding Archived, NotifyOnSourceUpdated=True}" 
                               Content="Archive" />
-                </StackPanel>
+
+					<Separator Margin="4"/>
+
+					<ItemsControl ItemsSource="{Binding Notifications}"/>
+
+				</StackPanel>
 
 
-                <StackPanel>
+                <StackPanel >
                     
                 <Button x:Name="EditPatientDetailsButton"
-                        Margin="8" Height="20" Width="20" VerticalAlignment="Top"
+                        Margin="4" Height="20" Width="20" VerticalAlignment="Top"
                         Click="EditPatientDetailsButton_Click">
 
                     <Image Source="/Images/Edit_grey_16x.png" Width="16" Height="16"/>
                 </Button>
                 
                 <Button x:Name="CreateMailFromTemplateButton"
-                        Margin="8" Height="20" Width="20" VerticalAlignment="Top"
+                        Margin="4" Height="20" Width="20" VerticalAlignment="Top"
                         Click="CreateMailFromTemplateButton_Click" DockPanel.Dock="Left">
 
                     <Image Source="/Images/MailOpen_16x.png" Width="16" Height="16"/>
@@ -104,7 +109,7 @@
                 </StackPanel>
                 
                 <TextBlock DockPanel.Dock="Top">Brief Details:</TextBlock>
-                <TextBox TextWrapping="Wrap" 
+                <TextBox TextWrapping="Wrap" Margin="4"
                          Text="{Binding Referral.BriefDetails,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
                          AcceptsReturn="True"  />
 
@@ -148,7 +153,7 @@
                 </Grid>
             </GroupBox>
 
-            <!-- Visualization Area -->
+            <!-- Visualization Area 
             <GroupBox Header="Visualization" Height="300">
                 <lvc:CartesianChart LegendLocation="Left" 
                 DataClick = "OnEventClicked" DisableAnimations="True" Series="{Binding ReferralsEventsCollection}">
@@ -165,7 +170,7 @@
                         <local:EventChartTooltip/>
                     </lvc:CartesianChart.DataTooltip>
                 </lvc:CartesianChart>
-            </GroupBox>
+            </GroupBox>-->
 
             <!-- Patient Contact Input-->
             <GroupBox Header="Patient Contact">

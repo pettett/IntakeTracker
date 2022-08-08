@@ -28,13 +28,17 @@ public abstract class ViewModelBase : INotifyPropertyChanged, ITrackable
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    protected void SetProperty<T>(ref T field, T newValue, bool log = true, [CallerMemberName] string? propertyName = null)
+
+    public virtual void AddListener(PropertyChangedEventHandler listener)
+    {
+        PropertyChanged += listener;
+    }
+
+
+    protected void SetProperty<T>(ref T field, T newValue, [CallerMemberName] string? propertyName = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, newValue) && propertyName != null)
         {
-            if (log)
-                UndoRedo.LogChange(this, field, propertyName);
-
             field = newValue;
             NotifyPropertyChanged(propertyName);
         }
@@ -89,6 +93,7 @@ public class DateRecord : ViewModelBase
 
 public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?>, ICommand, INotifyPropertyChanged
 {
+
 
 
     [Key] public ulong NHSNumberKey { get; set; }
@@ -165,10 +170,10 @@ public sealed class PatientReferral : ViewModelBase, IEquatable<PatientReferral?
     public DateRecord ContactAttempted { get; set; } = new();
     public DateRecord DateContactMade { get; set; } = new();
 
-    public Test MRI { get; set; } = new("MRI", TestType.MRI);
-    public Test LP { get; set; } = new("LP", TestType.LP);
-    public Test EP { get; set; } = new("EP", TestType.EP);
-    public Test Bloods { get; set; } = new("Bloods", TestType.Bloods);
+    public Test MRI { get; set; } = new(TestType.MRI);
+    public Test LP { get; set; } = new(TestType.LP);
+    public Test EP { get; set; } = new(TestType.EP);
+    public Test Bloods { get; set; } = new(TestType.Bloods);
 
 
 
@@ -233,41 +238,44 @@ AP-4 - ";
 
 
 
-    [NotMapped, JsonIgnore] public string MRISummary => TestSummary(MRI);
-    [NotMapped, JsonIgnore] public string EPSummary => TestSummary(EP);
-    [NotMapped, JsonIgnore] public string LPSummary => TestSummary(LP);
-    [NotMapped, JsonIgnore] public string BloodsSummary => TestSummary(Bloods);
+    [NotMapped, JsonIgnore] public string? MRISummary => TestSummary(MRI);
+    [NotMapped, JsonIgnore] public string? EPSummary => TestSummary(EP);
+    [NotMapped, JsonIgnore] public string? LPSummary => TestSummary(LP);
+    [NotMapped, JsonIgnore] public string? BloodsSummary => TestSummary(Bloods);
+
+
+    public void Init()
+    {
+        MRI.Type = TestType.MRI;
+        LP.Type = TestType.LP;
+        EP.Type = TestType.EP;
+        Bloods.Type = TestType.Bloods;
+    }
+
     /// <summary>
     /// Generate a summary for this referral relevant to the selected test
     /// </summary>
-    public string TestSummary(Test t)
+    public string? TestSummary(Test t) => t.TestStage switch
     {
-        TestStage stage = t.TestStage;
+        // No good information for timing - not known if needed or not requested
+        TestStage.Unknown =>
+            $"Waiting for {t.Name} triage since referral {DateReferralReceived.DaysSinceLabel()}",
 
-        return stage switch
-        {
-            // No good information for timing - not known if needed or not requested
-            TestStage.Unknown =>
-                $"Waiting for triage since referral {DateReferralReceived.DaysSinceLabel()}",
+        TestStage.WaitingForRequest => $"Waiting for {t.Name} request",
 
-            TestStage.WaitingForRequest => "Waiting for request",
+        TestStage.WaitingForTest when !t.TestDate.Booked =>
+            $"Waiting for a {t.Name} date since request {t.RequestedDate.DaysSinceLabel()}",
+        TestStage.WaitingForTest when !t.TestDate.HasOccurred =>
+            $"Waiting for test {t.TestDate.DaysToLabel()}",
 
-            TestStage.WaitingForTest when !t.TestDate.Booked =>
-                $"Waiting for a test date since request {t.RequestedDate.DaysSinceLabel()}",
-            TestStage.WaitingForTest when !t.TestDate.HasOccurred =>
-                $"Waiting for test {t.TestDate.DaysToLabel()}",
+        TestStage.WaitingForReport when !t.ReportedDate.Booked =>
+            $"Waiting for a {t.Name} report since test {t.TestDate.DaysSinceLabel()}",
+        TestStage.WaitingForReport when !t.ReportedDate.HasOccurred =>
+            $"Waiting for a {t.Name} report {t.ReportedDate.DaysToLabel()}",
+        _ =>
+            null
+    };
 
-            TestStage.WaitingForReport when !t.ReportedDate.Booked =>
-                $"Waiting for a report since test {t.TestDate.DaysSinceLabel()}",
-            TestStage.WaitingForReport when !t.ReportedDate.HasOccurred =>
-                $"Waiting for report {t.ReportedDate.DaysToLabel()}",
-            _ =>
-                "invalid state"
-
-        };
-
-
-    }
 
     //public bool IsAwaited(Test test, TestType t, out ReferralEvent e)
     //{

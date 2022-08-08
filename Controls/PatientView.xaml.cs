@@ -2,6 +2,8 @@
 using IntakeTrackerApp.Extensions;
 using IntakeTrackerApp.Windows;
 using LiveCharts.Configurations;
+using System.Collections.ObjectModel;
+using System.Windows.Controls;
 
 namespace IntakeTrackerApp.Controls;
 
@@ -65,18 +67,7 @@ public class OrientationConverter : IValueConverter
 /// </summary>
 public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackable
 {
-	public PatientReferral Referral
-	{
-		get => (PatientReferral)GetValue(ReferralProperty);
-		set => SetValue(ReferralProperty, value);
-	}
-
-	public static readonly DependencyProperty ReferralProperty
-		= DependencyProperty.Register("Referral", typeof(PatientReferral), typeof(PatientView),
-			new FrameworkPropertyMetadata(new PatientReferral())
-			{
-				AffectsRender = true,
-			});
+	public PatientReferral Referral { get; set; }
 
 	// public static readonly RoutedUICommand ArchiveCommand = new("Archive Command", "ArchiveCommand", typeof(PatientView));
 	public ChartValues<Event> BloodsValues { get; set; } = new();
@@ -88,6 +79,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	public ChartValues<Event> ReferralValues { get; set; } = new();
 	public ChartValues<Event> AppointmentValues { get; set; } = new();
 
+	public ObservableCollection<string> Notifications { get; set; } = new();
 
 	public SeriesCollection ReferralsEventsCollection { get; set; }
 
@@ -213,16 +205,14 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 			AddEvent("Medical Appointment", Referral.MedicalAppointment, enabled: Referral.MedicalAppointmentNeeded == true).
 			AddEvent("Nursing Appointment", Referral.NursingAppointment, enabled: Referral.NursingAppointmentNeeded == true);
 
-		XAxis.MinValue = g.Min;
-		XAxis.MaxValue = g.Max;
-		YAxis.MaxValue = Math.Max(1, Event.EventCatagories.Count);
+		//XAxis.MinValue = g.Min;
+		//XAxis.MaxValue = g.Max;
+		//YAxis.MaxValue = Math.Max(1, Event.EventCatagories.Count);
 	}
-	public PatientView(PatientReferral referral, Vault v) : this(v)
+	public PatientView(PatientReferral referral, Vault v)
 	{
 		Referral = referral;
-	}
-	public PatientView(Vault v)
-	{
+
 		MainVault = v;
 		//This determines the order of the keys
 		ReferralsEventsCollection = LiveChartsExtensions.GenerateSeries().
@@ -244,7 +234,25 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		//lets save the mapper globally
 		Charting.For<Event>(eventMapper);
 		Loaded += new RoutedEventHandler(PatientView_Loaded);
+		void TestChanged(object? sender, PropertyChangedEventArgs? e)
+		{
+			void AddSummary(string? summary) { if (summary != null) Notifications.Add(summary); }
+			Notifications.Clear();
+			AddSummary(Referral.MRISummary);
+			AddSummary(Referral.EPSummary);
+			AddSummary(Referral.LPSummary);
+			AddSummary(Referral.BloodsSummary);
+		}
 
+		Referral.MRI.AddListener(TestChanged);
+		Referral.EP.AddListener(TestChanged);
+		Referral.LP.AddListener(TestChanged);
+		Referral.Bloods.AddListener(TestChanged);
+
+		TestChanged(null, null);
+
+		Debug.WriteLine(Referral.Name);
+		Debug.WriteLine(Notifications);
 
 
 		InitializeComponent();
@@ -257,7 +265,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 		//Check DataContext Property here - Value is not null
 
-		XAxis.Sections = LiveChartsExtensions.GenerateSections().AddTodayLine();
+		//	XAxis.Sections = LiveChartsExtensions.GenerateSections().AddTodayLine();
 
 		RegenerateValues();
 

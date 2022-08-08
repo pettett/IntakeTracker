@@ -33,6 +33,7 @@ public class Vault
 	/// Directory for local backups
 	/// </summary>
 	public string LocalBackupDirectory => Path.Join(vaultPath, "backup");
+	public string RoamingBackupDirectory => Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Referral_Tracker", Name, "backup");
 
 	private readonly string vaultPath;
 
@@ -83,16 +84,19 @@ public class Vault
 		if (Context != null)
 		{
 			await Context.Save();
-
-			string backupFile = Path.Join(LocalBackupDirectory, $"referrals_{DateTime.Now:dd_MM_yyyy}.db");
-			if (!File.Exists(backupFile))
+			string backupFile = $"referrals_{DateTime.Now:dd_MM_yyyy}.db";
+			string localBackupFile = Path.Join(LocalBackupDirectory, backupFile);
+			string roamingBackupFile = Path.Join(RoamingBackupDirectory, backupFile);
+			if (!File.Exists(localBackupFile))
 			{
 				if (lastBackup == null || (DateTime.Now - lastBackup.Value).Hours > 24)
 				{
 
 					lastBackup = DateTime.Now;
 					Directory.CreateDirectory(LocalBackupDirectory);
-					File.Copy(DatabasePath, backupFile);
+					Directory.CreateDirectory(RoamingBackupDirectory);
+					File.Copy(DatabasePath, localBackupFile);
+					File.Copy(DatabasePath, roamingBackupFile);
 					await SaveSettingsChangesAsync();
 				}
 				else

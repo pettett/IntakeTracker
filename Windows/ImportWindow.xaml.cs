@@ -1,8 +1,8 @@
 ﻿
-using System.Text.Json;
-using System.IO;
-using System.Data;
 using IntakeTrackerApp.DataManagement;
+using System.Data;
+using System.IO;
+using System.Text.Json;
 
 namespace IntakeTrackerApp.Windows;
 
@@ -45,7 +45,7 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 
 	public bool OverrideDuplicates
 	{
-		get => overrideDuplicates; 
+		get => overrideDuplicates;
 		set
 		{
 			overrideDuplicates = value;
@@ -128,24 +128,26 @@ public partial class ImportWindow : Window, INotifyPropertyChanged
 	public PatientReferral[]? ImportSpreadsheet()
 	{
 		using Handlers.SpreadsheetHandler spreadsheet = new(FileName, true);
-		PatientReferral[] result = spreadsheet.LoadData<PatientReferral>();
+		PatientReferral[] result = spreadsheet.LoadData<PatientReferral>(
+			() => new PatientReferral()
+			);
 
 		//PatientReferral[] result = new PatientReferral[t.Rows.Count];
-	//	int i = 0;
+		//	int i = 0;
 
-	//	var properties = typeof(PatientReferral).GetProperties().Where(x => x.CanWrite && x.CanRead).ToArray();
+		//	var properties = typeof(PatientReferral).GetProperties().Where(x => x.CanWrite && x.CanRead).ToArray();
 
-	//	foreach (DataRow r in t.Rows)
-	//	{
-			//set values for every field
+		//	foreach (DataRow r in t.Rows)
+		//	{
+		//set values for every field
 		//	result[i] = new();
-	//		foreach (var property in properties)
-	//		{
-	//			property.SetValue(result[i], r[property.Name]);
-	//		}
+		//		foreach (var property in properties)
+		//		{
+		//			property.SetValue(result[i], r[property.Name]);
+		//		}
 
-	//		i++;
-	//	}
+		//		i++;
+		//	}
 
 		return result;
 	}

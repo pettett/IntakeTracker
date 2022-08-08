@@ -29,31 +29,29 @@ namespace IntakeTrackerApp.DataManagement
     {
         public static Dictionary<TestType, Dictionary<TestStage, TestGroup>> TestGroups { get; set; } = new();
 
-        private readonly string name = "";
-
-
         private bool? _needed;
         public DateRecord RequestedDate { get; init; } = new();
         public DateRecord TestDate { get; init; } = new();
         public DateRecord ReportedDate { get; init; } = new();
 
-
-        public string Name
-        {
-            get => name;
-            init => name = value;
-        }
+        [NotMapped]
+        public string Name => Type.ToString();
 
         [NotMapped]
-        public TestType Type { get; init; }
-        public Test(string name, TestType type)
+        public TestType Type { get; set; }
+        public Test(TestType type)
         {
-            this.name = name;
             this.Type = type;
         }
-
         public Test()
         {
+        }
+        public override void AddListener(PropertyChangedEventHandler listener)
+        {
+            base.AddListener(listener);
+            RequestedDate.AddListener(listener);
+            TestDate.AddListener(listener);
+            ReportedDate.AddListener(listener);
         }
 
         public bool? Needed

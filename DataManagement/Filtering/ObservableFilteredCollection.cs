@@ -175,7 +175,7 @@ public class ObservableFilteredCollection<T>
 		}
 		catch (OperationCanceledException e)
 		{
-			Debug.Print("Filter cancelled");
+			Debug.Print("Filter canceled");
 
 			// Canceled
 		}
