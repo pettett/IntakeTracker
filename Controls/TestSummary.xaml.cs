@@ -237,25 +237,7 @@ public partial class TestSummary : UserControl, INotifyPropertyChanged
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
 
-	public double[] GenerateBars(uint waitingTimeWidth, Dictionary<uint, double> waitingTimes)
-	{
-		uint barCount = waitingTimes.Keys.DefaultIfEmpty().Max() + 1;
 
-		double[] bars = new double[barCount];
-
-		foreach (var kvp in waitingTimes)
-		{
-			bars[kvp.Key] = kvp.Value;
-		}
-		return bars;
-	}
-
-
-
-	public void OnReferralPointClicked(object sender, ChartPoint p)
-	{
-		((ReferralPoint)p.Instance).OnClicked();
-	}
 
 
 	private void AwaitingResultsList_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Collections.ObjectModel;
 
-namespace nGantt.GanttChart
+namespace nGantt.GanttChart;
+
+public class TimeLine
 {
-    public class TimeLine
+    public TimeLine()
     {
-        public TimeLine()
-        {
-            Items = new ObservableCollection<TimeLineItem>();
-        }
-
-        public ObservableCollection<TimeLineItem> Items { get; set; }
-        
+        Items = new ObservableCollection<TimeLineItem>();
     }
+
+    public ObservableCollection<TimeLineItem> Items { get; set; }
+
 }

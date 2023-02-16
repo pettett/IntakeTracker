@@ -5,17 +5,23 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:IntakeTrackerApp.Controls" 
              mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800" 
-	xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
-             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf">
+			 
+        xmlns:ng="clr-namespace:nGantt"
+        xmlns:data="clr-namespace:IntakeTrackerApp.DataManagement"
+	xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib" 
+			 d:DataContext="{d:DesignInstance Type=local:PatientView}">
 
     <UserControl.Resources>
         <local:OrientationConverter x:Key="OrientationConverter" />
         <BooleanToVisibilityConverter x:Key="cBoolToVis"/>
-    </UserControl.Resources>
+
+ 
+
+	</UserControl.Resources>
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" Padding="2">
 
-        <StackPanel x:Name="ReferralStack" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PatientView}}}">
+        <StackPanel x:Name="ReferralStack" >
             <!-- Details and referral information-->
             <DockPanel>
                 <StackPanel Margin="4">
@@ -192,15 +198,13 @@
 
 
                     <TextBlock x:Name="ContactAttempted" Margin="4,4,8,4" Grid.Row="1">Contact Attempted:</TextBlock>
-                    <local:DateRecordControl Grid.Row="1"  SelectedDate="{Binding Referral.ContactAttempted.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.ContactAttempted.Comment,NotifyOnSourceUpdated=True}"
+					<local:DateRecordControl Grid.Row="1"  DateRecord="{Binding Referral.ContactAttempted,NotifyOnSourceUpdated=True}" 
                                              Margin="4" 
                                             Grid.Column="1"/>
 
 
                     <TextBlock Margin="4,4,8,4" Grid.Row="2">Contact Made:</TextBlock>
-                    <local:DateRecordControl SelectedDate="{Binding Referral.DateContactMade.Date,NotifyOnSourceUpdated=True}" 
-                                             Comment="{Binding Referral.DateContactMade.Comment,NotifyOnSourceUpdated=True}"
+					<local:DateRecordControl DateRecord="{Binding Referral.DateContactMade,NotifyOnSourceUpdated=True}"  
                                              Margin="4" Grid.Row="2" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
@@ -225,14 +229,13 @@
                     <TextBlock  Margin="4,4,8,4" Grid.Row="0">Previous Correspondence Requested:</TextBlock>
 
                     <local:DateRecordControl  x:Name="CorrespondenceRequested"
-                                              SelectedDate="{Binding Referral.PreviousCorrespondenceRequested.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.PreviousCorrespondenceRequested.Comment,NotifyOnSourceUpdated=True}"
+                                              DateRecord="{Binding Referral.PreviousCorrespondenceRequested}"
+       
                                              Margin="8,4,4,4" Grid.Row="0" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,8,4" Grid.Row="1">Previous Correspondence Received:</TextBlock>
 
-                    <local:DateRecordControl SelectedDate="{Binding Referral.PreviousCorrespondenceReceived.Date,NotifyOnSourceUpdated=True}" 
-                                             Comment="{Binding Referral.PreviousCorrespondenceReceived.Comment,NotifyOnSourceUpdated=True}" 
+					<local:DateRecordControl DateRecord="{Binding Referral.PreviousCorrespondenceReceived}"  
                                              Margin="8,4,4,4" Grid.Row="1" Grid.Column="1"/>
 
                     <TextBlock Margin="4" Grid.Row="0" Grid.Column="2">Correspondence Summary</TextBlock>
@@ -278,20 +281,17 @@
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="0">Blood Forms Sent</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.Bloods.RequestedDate.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.Bloods.RequestedDate.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.Bloods.RequestedDate,NotifyOnSourceUpdated=True}" 
                                              Margin="4,4,4,4" Grid.Row="0" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="1">Bloods Planned</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.Bloods.TestDate.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.Bloods.TestDate.Comment,NotifyOnSourceUpdated=True}" 
+                                             DateRecord="{Binding Referral.Bloods.TestDate,NotifyOnSourceUpdated=True}" 
                                              Margin="4,4,4,4" Grid.Row="1" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="2">Blood Reported</TextBlock>
                     <local:DateRecordControl MaxWidth="200" 
-                                             SelectedDate="{Binding Referral.Bloods.ReportedDate.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.Bloods.ReportedDate.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.Bloods.ReportedDate,NotifyOnSourceUpdated=True}" 
                                              Margin="4,4,4,4" Grid.Row="2" Grid.Column="1"/>
 
                     <TextBlock Margin="4,4,4,4" Grid.Row="0" Grid.Column="2">Blood Results</TextBlock>
@@ -322,14 +322,12 @@
 
                         <TextBlock Margin="4" Text="Provisional Date"/>
                         <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
-                                             SelectedDate="{Binding Referral.ProvisinalNursingClinic.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.ProvisinalNursingClinic.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.ProvisinalNursingClinic,NotifyOnSourceUpdated=True}" 
                                              Margin="4"/>
 
                         <TextBlock Margin="4" Grid.Row="1" Text="Date"/>
                         <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
-                                             SelectedDate="{Binding Referral.NursingAppointment.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.NursingAppointment.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.NursingAppointment,NotifyOnSourceUpdated=True}" 
                                              Margin="4" Grid.Row="1"/>
 
                         <TextBlock  Grid.Row="2" Grid.ColumnSpan="2" Text="Plan and Comments"/>
@@ -356,14 +354,12 @@
 
                         <TextBlock Margin="4" Text="Provisional Date"/>
                         <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
-                                             SelectedDate="{Binding Referral.ProvisionalConsultantClinic.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.ProvisionalConsultantClinic.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.ProvisionalConsultantClinic,NotifyOnSourceUpdated=True}" 
                                              Margin="4"/>
 
                         <TextBlock Margin="4" Grid.Row="1" Text="Date"/>
                         <local:DateRecordControl Grid.Column="1" HorizontalAlignment="Stretch"
-                                             SelectedDate="{Binding Referral.MedicalAppointment.Date,NotifyOnSourceUpdated=True}"
-                                             Comment="{Binding Referral.MedicalAppointment.Comment,NotifyOnSourceUpdated=True}"
+                                             DateRecord="{Binding Referral.MedicalAppointment,NotifyOnSourceUpdated=True}" 
                                              Margin="4" Grid.Row="1"/>
 
                         <TextBlock  Grid.Row="2" Grid.ColumnSpan="2" Text="Plan and Comments"/>
@@ -373,8 +369,13 @@
 
 
                 </local:CollapsibleGroupControl>
-            </Grid>
 
-        </StackPanel>
+
+
+
+			</Grid>
+
+			<ng:GanttControl  x:Name="ganttControl"/>
+		</StackPanel>
     </ScrollViewer>
 </UserControl>

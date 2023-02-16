@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ng="clr-namespace:nGantt.GanttChart"
+             xmlns:local="clr-namespace:nGantt"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:GanttControl}"
              d:DesignHeight="290" d:DesignWidth="485" DataContext="{Binding}">
 
 	<UserControl.Resources>
@@ -37,7 +39,7 @@
 						<ItemsControl ItemsSource="{Binding Path=Items}" VerticalAlignment="Center" VerticalContentAlignment="Stretch" Height="{Binding ElementName=Scroller, Path=ExtentHeight}">
 							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>
-									<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
+									<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:GanttControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
 								</ItemsPanelTemplate>
 							</ItemsControl.ItemsPanel>
 							<ItemsControl.ItemContainerStyle>
@@ -57,7 +59,7 @@
 			</ItemsControl>
 		</DataTemplate>
 
-		<DataTemplate x:Key="GanttTimeLineTemplate">
+		<DataTemplate DataType="{x:Type ng:TimeLine}" x:Key="GanttTimeLineTemplate">
 			<ItemsControl ItemsSource="{Binding}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
@@ -65,11 +67,11 @@
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.ItemTemplate>
-					<DataTemplate>
+					<DataTemplate  >
 						<ItemsControl ItemsSource="{Binding Path=Items}" Height="20">
 							<ItemsControl.ItemsPanel>
-								<ItemsPanelTemplate>
-									<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
+								<ItemsPanelTemplate >
+									<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:GanttControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
 								</ItemsPanelTemplate>
 							</ItemsControl.ItemsPanel>
 							<ItemsControl.ItemContainerStyle>
@@ -91,7 +93,7 @@
 			</ItemsControl>
 		</DataTemplate>
 
-		<DataTemplate x:Key="GanttRowTemplate">
+		<DataTemplate DataType="{x:Type ng:GanttRow}" x:Key="GanttRowTemplate">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="100" ></ColumnDefinition>
@@ -104,15 +106,15 @@
 				</Grid.RowDefinitions>
 				<!-- The template for a row  -->
 				<TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding Path=RowHeader.Name}" ToolTip="{Binding Path=RowHeader.Name}" Margin="15,5,0,0" TextWrapping="Wrap"></TextBlock>
-				<Grid Name="RowGrid" Grid.Column="2" Grid.Row="0" Width="Auto" Height="{Binding ElementName=RowHeightSlider, Path=Value}" Margin="0,5,0,5">
+				<Grid Name="RowGrid" Grid.Column="2" Grid.Row="0" Width="Auto" Height="50" Margin="0,5,0,5">
 					<Grid.RowDefinitions>
-						<RowDefinition Height="{Binding ElementName=RowHeightSlider, Path=Value}"/>
+						<RowDefinition Height="50"/>
 					</Grid.RowDefinitions>
 	
-					<ItemsControl Grid.Row="0"  ItemsSource="{Binding Path=Tasks}" Height="{Binding ElementName=RowHeightSlider, Path=Value}">
+					<ItemsControl Grid.Row="0"  ItemsSource="{Binding Path=Tasks}" Height="50">
 						<ItemsControl.ItemsPanel>
 							<ItemsPanelTemplate>
-								<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
+								<ng:GanttRowPanel DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:GanttControl}}}" MinDate="{Binding Path=GanttData.MinDate}" MaxDate="{Binding Path=GanttData.MaxDate}"/>
 							</ItemsPanelTemplate>
 						</ItemsControl.ItemsPanel>
 						<ItemsControl.ItemContainerStyle>
@@ -123,7 +125,7 @@
 						</ItemsControl.ItemContainerStyle>
 						<ItemsControl.ItemTemplate>
 							<DataTemplate >
-								<Border CornerRadius="3" MouseDown="Border_MouseDown" IsHitTestVisible="True" Padding="7,5,7,2" IsEnabled="{Binding IsEnabled}" Background="Blue">
+								<Border CornerRadius="3" MouseDown="Border_MouseDown" IsHitTestVisible="True" Padding="7,5,7,2" IsEnabled="{Binding IsEnabled}" Background="LightGray">
 									<Border.ContextMenu>
 										<ContextMenu ItemsSource="{Binding Path=DataContext.GanttTaskContextMenuItems, Source={x:Reference root}}">
 											<ContextMenu.ItemTemplate>
@@ -160,8 +162,7 @@
 										</StackPanel>
 									</Border.ToolTip>
 									<Border.Style>
-										<Style TargetType="Border">
-						 
+										<Style TargetType="Border"> 
 											<Setter Property="BorderThickness" Value="1"></Setter>
 											<Setter Property="BorderBrush" Value="Gray"></Setter>
 											<Style.Triggers>
@@ -174,36 +175,12 @@
 												</DataTrigger>
 											</Style.Triggers>
 										</Style>
-									</Border.Style>
-									<Grid>
-										<Grid.RowDefinitions>
-											<RowDefinition Height="*"/>
-											<RowDefinition Height="auto"/>
-										</Grid.RowDefinitions>
+									</Border.Style> 
+				
 										<DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="GanttTaskBorderContentArea">
 											<TextBlock MaxWidth="{Binding ElementName=GanttTaskBorderContentArea, Path=ActualWidth}" Text="{Binding Path=Name}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
 										</DockPanel>
-										<Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="1" Height="8" Background="Gray" Visibility="{Binding TaskProgressVisibility}">
-											<Border.ToolTip>
-												<TextBlock Text="{Binding PercentageCompletedText}"></TextBlock>
-											</Border.ToolTip>
-											<Grid>
-												<Border Name="VUMeter">
-													<Border.Background>
-														<SolidColorBrush Color="Red"/>
-													</Border.Background>
-												</Border>
-												<Border HorizontalAlignment="Stretch" Background="Gray">
-													<Border.RenderTransform>
-														<ScaleTransform  CenterX="{Binding ElementName=VUMeter, Path=ActualWidth}" ScaleX="{Binding PercentageCompleted}" ScaleY="1">
-
-														</ScaleTransform>
-													</Border.RenderTransform>
-												</Border>
-
-											</Grid>
-										</Border>
-									</Grid>
+								
 								</Border>
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
@@ -214,55 +191,6 @@
 			</Grid>
 		</DataTemplate>
 
-		<DataTemplate DataType="{x:Type ng:ExpandableGanttRowGroup}">
-			<Grid>
-				<Expander Template="{StaticResource ExpanderWithoutButton}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0" Padding="0" BorderThickness="0" IsExpanded="{Binding Path=IsExpanded}">
-					<Expander.Header>
-						<Border Margin="0" BorderThickness="0,1,0,1" Opacity="0.7" CornerRadius="0" Background="WhiteSmoke" BorderBrush="DarkGray" Height="25" Padding="3" Width="{Binding ElementName=Scroller, Path=ExtentWidth}">
-							<Grid>
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="auto"/>
-									<ColumnDefinition Width="4"/>
-									<ColumnDefinition Width="*"/>
-								</Grid.ColumnDefinitions>
-								<Image Grid.Column="0" Width="16" Height="16" VerticalAlignment="Center" Source="{Binding ImagePath}"></Image>
-								<ToggleButton Grid.Column="2" VerticalAlignment="Center"  IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}}">
-									<ToggleButton.Template>
-										<ControlTemplate>
-											<TextBlock Text="{Binding Path=Name}"  FontWeight="Bold" HorizontalAlignment="Left" />
-										</ControlTemplate>
-									</ToggleButton.Template>
-								</ToggleButton>
-							</Grid>
-						</Border>
-					</Expander.Header>
-					<ItemsControl ItemsSource="{Binding Path=Rows}" >
-						<ItemsControl.ItemsPanel>
-							<ItemsPanelTemplate>
-								<StackPanel Orientation="Vertical">
-								</StackPanel>
-							</ItemsPanelTemplate>
-						</ItemsControl.ItemsPanel>
-						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<ContentControl ContentTemplate="{StaticResource GanttRowTemplate}" Content="{Binding}"/>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</Expander>
-				<!--<Rectangle VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="8" Fill="WhiteSmoke" Margin="0,25,0,2"></Rectangle>-->
-				<Border VerticalAlignment="Stretch" HorizontalAlignment="Left" Margin="0,25,0,2" Background="WhiteSmoke" Width="9">
-					<Rectangle VerticalAlignment="Stretch" HorizontalAlignment="Left" Width="2" Margin="3,4,0,2" >
-						<Rectangle.Fill>
-							<LinearGradientBrush SpreadMethod="Reflect" StartPoint="0 0" EndPoint="0 0.05">
-								<GradientStop Offset="0.5" Color="Gray"/>
-								<GradientStop Offset="0.5" Color="Transparent"/>
-							</LinearGradientBrush>
-						</Rectangle.Fill>
-					</Rectangle>
-				</Border>
-			</Grid>
-		</DataTemplate>
 
 		<DataTemplate DataType="{x:Type ng:HeaderedGanttRowGroup}">
 			<Grid>
@@ -270,16 +198,10 @@
 					<RowDefinition Height="auto"></RowDefinition>
 					<RowDefinition Height="auto"></RowDefinition>
 				</Grid.RowDefinitions>
-				<Border BorderThickness="0,1,0,1" CornerRadius="0" Opacity="0.7" Background="WhiteSmoke" Height="25" BorderBrush="DarkGray" Padding="3" Width="{Binding ElementName=Scroller, Path=ExtentWidth}">
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="auto"/>
-							<ColumnDefinition Width="4"/>
-							<ColumnDefinition Width="*"/>
-						</Grid.ColumnDefinitions>
-						<Image Grid.Column="0" Width="16" Height="16" VerticalAlignment="Center" Source="{Binding ImagePath}"></Image>
-						<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Path=Name}" FontWeight="Bold" />
-					</Grid>
+				<Border BorderThickness="0,1,0,1" CornerRadius="0" Opacity="0.7" Background="WhiteSmoke" Height="25" BorderBrush="DarkGray" Padding="3"  >
+ 
+						<TextBlock  VerticalAlignment="Center" Text="{Binding Path=Name}" FontWeight="Bold" />
+ 
 				</Border>
 				<ItemsControl Grid.Row="1" ItemsSource="{Binding Path=Rows}" >
 					<ItemsControl.ItemsPanel>
@@ -320,7 +242,7 @@
 			</Grid>
 		</DataTemplate>
 
-		<DataTemplate x:Key="GanttGrid">
+		<DataTemplate x:Key="GanttGrid" >
 			<Grid Name="GanttMainGrid">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="auto"></RowDefinition>
@@ -337,29 +259,19 @@
 				<ContentControl Grid.Row="0" BorderBrush="Blue" BorderThickness="1"  Grid.Column="1" Grid.ColumnSpan="2" ContentTemplate="{StaticResource GanttTimeLineTemplate}" Content="{Binding Path=TimeLines}" Margin="0,0,18,0"/>
 				<!-- Support rows -->
 				<Rectangle Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Gray"/>
-				<Rectangle Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Gray"/>
-				<ScrollViewer Name="Scroller" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible" Grid.Row="2" Grid.ColumnSpan="3">
-					<Grid>
+				<Rectangle Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Gray"/> 
+					<Grid Grid.Row="2" Grid.ColumnSpan="3">
 						<!-- Gridlines -->
 						<ContentControl ContentTemplate="{StaticResource GanttTimeLineGridLines}" Content="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}, Path=GridLineTimeLine}" Margin="100,0,1,0"/>
 						<!-- RowGroups -->
 						<ItemsControl ItemsSource="{Binding Path=RowGroups}"/>
-					</Grid>
-				</ScrollViewer>
+					</Grid> 
 			</Grid>
 		</DataTemplate>
 	</UserControl.Resources>
 
-	<Grid Margin="0,5,0,0" x:Name="root" >
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*"></RowDefinition>
-			<RowDefinition Height="5"></RowDefinition>
-			<RowDefinition Height="auto"></RowDefinition>
-		</Grid.RowDefinitions>
+	
+	<GroupBox Header="Timeline" Margin="0,5,0,0" x:Name="root" >
 		<ContentControl Grid.Row="0" ContentTemplate="{StaticResource GanttGrid}" Content="{Binding Path=GanttData}"/>
-		<StackPanel Orientation="Horizontal" Grid.Row="2">
-			<Label>Size</Label>
-			<Slider Minimum="30" Maximum="100" Value="40" Name="RowHeightSlider" Width="200" Height="22"/>
-		</StackPanel>
-	</Grid>
+	</GroupBox>
 </UserControl>

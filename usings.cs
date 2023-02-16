@@ -1,5 +1,4 @@
-﻿global using LiveCharts;
-global using LiveCharts.Wpf;
+﻿
 global using System;
 global using System.Collections;
 global using System.Collections.Generic;

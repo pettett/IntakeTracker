@@ -71,8 +71,7 @@
             </TextBlock>
 
             <local:DateRecordControl  Margin="4" Grid.Column="1"  
-                                        SelectedDate="{Binding Test.RequestedDate.Date, NotifyOnSourceUpdated=True}"
-                                        Comment="{Binding Test.RequestedDate.Comment, NotifyOnSourceUpdated=True}"
+                                        DateRecord="{Binding Test.RequestedDate }" 
                                         Validation.ErrorTemplate="{StaticResource validationError}"/>
 
 
@@ -83,8 +82,7 @@
             </TextBlock>
 
             <local:DateRecordControl Margin="4" Grid.Column="1" Grid.Row="1"
-                                        SelectedDate="{Binding Test.TestDate.Date, NotifyOnSourceUpdated=True}"
-                                        Comment="{Binding Test.TestDate.Comment, NotifyOnSourceUpdated=True}"
+                                        DateRecord="{Binding Test.TestDate }" 
                                         Validation.ErrorTemplate="{StaticResource validationError}"/>
 
             <TextBlock Margin="4,0,4,0" VerticalAlignment="Center" Grid.Row="2"  >
@@ -95,8 +93,7 @@
 
 
             <local:DateRecordControl Margin="4" Grid.Column="1" Grid.Row="2" 
-                                        SelectedDate="{Binding Test.ReportedDate.Date, NotifyOnSourceUpdated=True}"
-                                        Comment="{Binding Test.ReportedDate.Comment, NotifyOnSourceUpdated=True}"
+                                        DateRecord="{Binding Test.ReportedDate }" 
                                      
                                         Validation.ErrorTemplate="{StaticResource validationError}"/>
 

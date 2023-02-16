@@ -1,0 +1,17 @@
+﻿<Window x:Class="IntakeTrackerApp.Windows.DateRecordTest"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IntakeTrackerApp.Windows"
+        xmlns:c="clr-namespace:IntakeTrackerApp.Controls"
+        mc:Ignorable="d"
+
+        Title="DateRecordTest" Height="450" Width="800">
+	<StackPanel 		DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:DateRecordTest}}}">
+		<c:DateRecordControl Height="60" DateRecord="{Binding Record}" />
+
+		<TextBlock Text="{Binding Record.Date}"/>
+		<TextBlock Text="{Binding Record.Comment}"/>
+	</StackPanel>
+</Window>

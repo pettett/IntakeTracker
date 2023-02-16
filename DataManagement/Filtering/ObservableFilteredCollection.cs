@@ -70,7 +70,7 @@ public class ObservableFilteredCollection<T>
 		// would be very slow
 		switch (e.Action)
 		{
-			case NotifyCollectionChangedAction.Add:
+			case NotifyCollectionChangedAction.Add when e.NewItems != null:
 				foreach (T item in e.NewItems)
 				{
 					// Filter incoming items
@@ -81,7 +81,7 @@ public class ObservableFilteredCollection<T>
 						FilteredOut.Add(item);
 				}
 				break;
-			case NotifyCollectionChangedAction.Remove:
+			case NotifyCollectionChangedAction.Remove when e.NewItems != null:
 				foreach (T item in e.NewItems)
 				{
 					FilteredIn.Remove(item);

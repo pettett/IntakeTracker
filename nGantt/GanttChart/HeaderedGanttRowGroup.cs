@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-namespace nGantt.GanttChart
+namespace nGantt.GanttChart;
+
+public class HeaderedGanttRowGroup : GanttRowGroup
 {
-    public class HeaderedGanttRowGroup : GanttRowGroup
-    {
-        public string Name { get; set; }
-        public string ImagePath { get; set; }
-    }
+
+
+    public string Name { get; set; } = "";
+    public string ImagePath { get; set; } = "";
 }

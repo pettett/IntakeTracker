@@ -34,13 +34,10 @@ public partial class TodayDateControl : UserControl, INotifyPropertyChanged
 	}
 	public void Today(object sender, EventArgs e)
 	{
-		if (SelectedDate == null || MessageBox.Show("Doing so could loose data", "Replace date with today?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+		if (SelectedDate == null || SelectedDate == DateTime.Today || MessageBox.Show("Doing so could loose data", "Replace date with today?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
 		{
 			SelectedDate = DateTime.Today;
 		}
-
-		DateControl.SelectedDate = SelectedDate;
-
 	}
 
 	public event PropertyChangedEventHandler? PropertyChanged;

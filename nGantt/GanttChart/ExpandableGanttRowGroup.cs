@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace nGantt.GanttChart
+namespace nGantt.GanttChart;
+
+public class ExpandableGanttRowGroup : HeaderedGanttRowGroup
 {
-    public class ExpandableGanttRowGroup : HeaderedGanttRowGroup
-    {
-        public bool IsExpanded { get; set; }
-    }
+    public bool IsExpanded { get; set; }
 }

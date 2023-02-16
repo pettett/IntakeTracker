@@ -48,7 +48,7 @@ public partial class MainWindow : Window
 
 	protected override void OnClosing(CancelEventArgs e)
 	{
-		if (Data.Singleton == null) return;
+		if (Data.NullableSingleton == null) return;
 
 		// clean up database connections
 		if (!Data.Singleton.IsSaved)

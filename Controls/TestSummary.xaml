@@ -8,9 +8,7 @@
              xmlns:data="clr-namespace:IntakeTrackerApp.DataManagement"
              xmlns:filter="clr-namespace:IntakeTrackerApp.DataManagement.Filtering"
              xmlns:extensions="clr-namespace:IntakeTrackerApp.Extensions"
-             mc:Ignorable="d" 
-          
-             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             mc:Ignorable="d"  
              d:DataContext="{d:DesignInstance Type=local:TestSummary}"
              d:DesignHeight="450" d:DesignWidth="800">
 

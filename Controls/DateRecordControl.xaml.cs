@@ -1,6 +1,8 @@
 ﻿
 
 
+using IntakeTrackerApp.DataManagement;
+
 namespace IntakeTrackerApp.Controls;
 
 /// <summary>
@@ -11,35 +13,21 @@ public partial class DateRecordControl : UserControl, INotifyPropertyChanged
 
 
 
-	public static readonly DependencyProperty SelectedDateProperty = DependencyProperty.Register(
-		"SelectedDate", typeof(DateTime?), typeof(DateRecordControl), new FrameworkPropertyMetadata
+	public static readonly DependencyProperty DateRecordProperty = DependencyProperty.Register(
+		"DateRecord", typeof(DateRecord), typeof(DateRecordControl), new FrameworkPropertyMetadata
 		{
-			BindsTwoWayByDefault = true,
+			BindsTwoWayByDefault = false,
 			DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
 
 		});
 
-	public static readonly DependencyProperty CommentProperty = DependencyProperty.Register(
-		"Comment", typeof(string), typeof(DateRecordControl), new FrameworkPropertyMetadata
-		{
-			BindsTwoWayByDefault = true,
-			DefaultUpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-		});
 
-
-	public DateTime? SelectedDate
+	public DateRecord DateRecord
 	{
-		get => (DateTime?)GetValue(SelectedDateProperty);
-		set => SetProperty(SelectedDateProperty, value);
-		
+		get => (DateRecord)GetValue(DateRecordProperty);
+		set => SetProperty(DateRecordProperty, value);
 	}
 
-	public string Comment
-	{
-		get => (string)GetValue(CommentProperty);
-		set =>	SetProperty(CommentProperty, value);
-		
-	}
 
 	public void SetProperty(DependencyProperty prop, object? value)
 	{
@@ -51,6 +39,7 @@ public partial class DateRecordControl : UserControl, INotifyPropertyChanged
 	public DateRecordControl()
 	{
 		InitializeComponent();
+		ControlGrid.DataContext = this;
 
 	}
 	public event PropertyChangedEventHandler? PropertyChanged;

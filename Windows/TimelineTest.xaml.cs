@@ -44,7 +44,7 @@ public partial class TimelineTest : Window
 		ganttControl1.AllowUserSelection = true;
 
 		// listen to the GanttRowAreaSelected event
-		ganttControl1.GanttRowAreaSelected += new EventHandler<PeriodEventArgs>(ganttControl1_GanttRowAreaSelected);
+		ganttControl1.GanttRowAreaSelected += ganttControl1_GanttRowAreaSelected;
 
 		// define ganttTask context menu and action when each item is clicked
 		ganttTaskContextMenuItems.Add(new ContextMenuItem(ViewClicked, "View..."));
@@ -80,7 +80,7 @@ public partial class TimelineTest : Window
 		MessageBox.Show("Delete clicked for task " + ganttTask.Name);
 	}
 
-	void ganttControl1_GanttRowAreaSelected(object sender, PeriodEventArgs e)
+	void ganttControl1_GanttRowAreaSelected(object? sender, PeriodEventArgs e)
 	{
 		MessageBox.Show(e.SelectionStart.ToString() + " -> " + e.SelectionEnd.ToString());
 	}
@@ -110,8 +110,8 @@ public partial class TimelineTest : Window
 		var row3 = ganttControl1.CreateGanttRow(rowgroup2, "GanttRow 3");
 		ganttControl1.AddGanttTask(row2, new GanttTask() { Start = DateTime.Parse("2012-02-10"), End = DateTime.Parse("2012-03-10"), Name = "GanttRow 2:GanttTask 1" });
 		ganttControl1.AddGanttTask(row2, new GanttTask() { Start = DateTime.Parse("2012-03-25"), End = DateTime.Parse("2012-05-10"), Name = "GanttRow 2:GanttTask 2" });
-		ganttControl1.AddGanttTask(row2, new GanttTask() { Start = DateTime.Parse("2012-06-10"), End = DateTime.Parse("2012-09-15"), Name = "GanttRow 2:GanttTask 3", PercentageCompleted = 0.375 });
-		ganttControl1.AddGanttTask(row3, new GanttTask() { Start = DateTime.Parse("2012-01-07"), End = DateTime.Parse("2012-09-15"), Name = "GanttRow 3:GanttTask 1", PercentageCompleted = 0.5 });
+		ganttControl1.AddGanttTask(row2, new GanttTask() { Start = DateTime.Parse("2012-06-10"), End = DateTime.Parse("2012-09-15"), Name = "GanttRow 2:GanttTask 3" });
+		ganttControl1.AddGanttTask(row3, new GanttTask() { Start = DateTime.Parse("2012-01-07"), End = DateTime.Parse("2012-09-15"), Name = "GanttRow 3:GanttTask 1" });
 
 	}
 

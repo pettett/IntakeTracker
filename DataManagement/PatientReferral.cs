@@ -39,6 +39,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, ITrackable
     {
         if (!EqualityComparer<T>.Default.Equals(field, newValue) && propertyName != null)
         {
+            Debug.WriteLine($"{propertyName} set to {newValue}");
             field = newValue;
             NotifyPropertyChanged(propertyName);
         }

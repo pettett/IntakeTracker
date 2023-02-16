@@ -2,13 +2,17 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net7.0-windows8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<MinimumPlatformVersion>7.0</MinimumPlatformVersion>
 		<LangVersion>latest</LangVersion>
 
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
 		<EnablePreviewFeatures>True</EnablePreviewFeatures>
+
+		<SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -48,7 +52,6 @@
   <ItemGroup>
 		<PackageReference Include="DocumentFormat.OpenXml" Version="2.17.1" />
 		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
-		<PackageReference Include="LiveCharts.Wpf.NetCore3" Version="0.9.7" />
 		<PackageReference Include="Meziantou.Framework.WPF" Version="1.5.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0-preview.6.22329.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0-preview.6.22329.4" />
@@ -63,17 +66,19 @@
     <SplashScreen Include="Images\SlashScreen.png" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Controls\ReferralPointTooltip.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-	<ItemGroup>
-		<Page Update="Controls\ReferralPointTooltip.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-			<SubType>Designer</SubType>
-		</Page>
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

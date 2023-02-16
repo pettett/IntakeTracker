@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace nGantt.GanttChart
 {
-    public class GanttRowPanel : Panel 
+    public class GanttRowPanel : Panel
     {
         public static readonly DependencyProperty StartDateProperty =
            DependencyProperty.RegisterAttached("StartDate", typeof(DateTime), typeof(GanttRowPanel), new FrameworkPropertyMetadata(DateTime.MinValue, FrameworkPropertyMetadataOptions.AffectsParentArrange));
@@ -91,12 +91,12 @@ namespace nGantt.GanttChart
                 offset = 0;
 
             }
-            
+
             double range = (MaxDate - MinDate).Ticks;
             if ((offset + width) > range * pixelsPerTick)
                 width = range * pixelsPerTick - offset;
 
-            child.Arrange(new Rect(offset, 0, width, elementHeight));
+            child.Arrange(new Rect(offset, 0, Math.Max(0, width), elementHeight));
         }
     }
 }

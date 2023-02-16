@@ -24,12 +24,12 @@ namespace IntakeTrackerApp.Controls
 
 		private void Create_Click(object sender, RoutedEventArgs e)
 		{
-
+			//TODO:
 		}
 
 		private void Open_Click(object sender, RoutedEventArgs e)
 		{
-
+			//TODO:
 		}
 
 		private async void Migrate_Click(object sender, RoutedEventArgs e)

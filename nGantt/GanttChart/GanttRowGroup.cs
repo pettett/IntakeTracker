@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Collections.ObjectModel;
 
-namespace nGantt.GanttChart
+namespace nGantt.GanttChart;
+
+public class GanttRowGroup
 {
-    public class GanttRowGroup
+    public GanttRowGroup()
     {
-        public GanttRowGroup()
-        {
-            Rows = new ObservableCollection<GanttRow>();
-        }
-        public ObservableCollection<GanttRow> Rows { get; set; }
+        Rows = new();
     }
+    public ObservableCollection<GanttRow> Rows { get; set; }
 }

@@ -10,9 +10,8 @@ namespace nGantt.GanttChart
     {
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public Visibility TaskProgressVisibility { get; set; }
-        private double percentageCompleted;
 
         public GanttTask()
         {
@@ -31,31 +30,15 @@ namespace nGantt.GanttChart
             get { return (bool)GetValue(IsEnabledProperty); }
             set { SetValue(IsEnabledProperty, value); }
         }
-        
+
         public bool IsSelected
         {
             get { return (bool)GetValue(IsSelectedProperty); }
             set { SetValue(IsSelectedProperty, value); }
         }
 
-        public double PercentageCompleted
-        {
-            get 
-            {
-                return 1 - percentageCompleted;
-            }
-            set
-            {
-                percentageCompleted = value;
-            }
-        }
-        public string PercentageCompletedText
-        {
-            get
-            {
-                return String.Format("{0}%", Math.Round(percentageCompleted * 100, 0));
-            }
-        }
+
+
 
     }
 }

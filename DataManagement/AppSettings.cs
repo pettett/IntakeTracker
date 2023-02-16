@@ -41,7 +41,7 @@ public class AppSettings
 			{ using var file = File.Create(AppSettingsPath); }
 
 			Settings = new();
-			SaveSettingsAsync().Start();
+			SaveSettingsAsync().Wait();
 		}
 
 		Debug.WriteLine($"Settings located at {AppSettingsPath}");

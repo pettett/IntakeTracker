@@ -1,8 +1,11 @@
 ﻿using IntakeTrackerApp.DataManagement;
 using IntakeTrackerApp.Extensions;
 using IntakeTrackerApp.Windows;
-using LiveCharts.Configurations;
+using nGantt;
+using nGantt.GanttChart;
+using nGantt.PeriodSplitter;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using System.Windows.Controls;
 
 namespace IntakeTrackerApp.Controls;
@@ -70,18 +73,9 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 	public PatientReferral Referral { get; set; }
 
 	// public static readonly RoutedUICommand ArchiveCommand = new("Archive Command", "ArchiveCommand", typeof(PatientView));
-	public ChartValues<Event> BloodsValues { get; set; } = new();
-	public ChartValues<Event> MRIValues { get; set; } = new();
-	public ChartValues<Event> EPValues { get; set; } = new();
-	public ChartValues<Event> LPValues { get; set; } = new();
-	public ChartValues<Event> ContactValues { get; set; } = new();
-	public ChartValues<Event> CorrispondanceValues { get; set; } = new();
-	public ChartValues<Event> ReferralValues { get; set; } = new();
-	public ChartValues<Event> AppointmentValues { get; set; } = new();
+
 
 	public ObservableCollection<string> Notifications { get; set; } = new();
-
-	public SeriesCollection ReferralsEventsCollection { get; set; }
 
 
 	public static Func<double, string> DateTimeFormatter { get; set; } = value => new DateTime((long)value).ToShortDateString();
@@ -89,78 +83,11 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 	public Vault MainVault { get; set; }
 
-	private class EventSeriesGroup
-	{
-		public long Min;
-		public long Max;
 
 
-		public EventGroup AddEventGroup(EventCatagory name, ChartValues<Event> Values, bool clear = true)
-		{
-			return new EventGroup(this, name, Values, clear);
-		}
-
-		public void AddTest(ChartValues<Event> Values, DateRecord begining, Test test, EventCatagory catagory)
-		{
-			if (test.Needed == true)
-				AddEventGroup(catagory, Values).
-					AddEvent("Needed", begining, 0).
-					AddEvent("Requested", test.RequestedDate, 1.0 / 3.0).
-					AddEvent("Test", test.TestDate, 2.0 / 3.0).
-					AddEvent("Reported", test.ReportedDate, 1);
-			else
-				Values.Clear();
-		}
-
-	}
-
-	private static EventSeriesGroup GenerateEventSeriesGroup()
-	{
-		EventSeriesGroup s = new();
-		//Update min and max ranges of graph
-		//X axis cannot be left to auto update as empty collections cause centering at 0,
-		//resulting in dates starting from the year 0
-		//Any dates outside the default range will extend it
-		s.Min = DateTime.Today.AddDays(-1).Ticks;
-		s.Max = DateTime.Today.AddDays(1).Ticks;
-
-		return s;
-	}
-
-	private ref struct EventGroup
-	{
-		public readonly ChartValues<Event> Values;
-		public readonly int Catagory;
-		public EventSeriesGroup SeriesGroup;
-
-		public EventGroup AddEvent(string name, DateRecord date, double progress = 0, bool enabled = true)
-		{
-			if (enabled && date.Date is DateTime d && d.Year > 1000)
-			{
-				Values.Add(new Event(name, date, Catagory, progress * 0.5));
-				SeriesGroup.Min = d.Ticks > SeriesGroup.Min ? SeriesGroup.Min : d.Ticks;
-				SeriesGroup.Max = d.Ticks < SeriesGroup.Max ? SeriesGroup.Max : d.Ticks;
-			}
-			return this;
-		}
-		public EventGroup(EventSeriesGroup seriesGroup, EventCatagory name, ChartValues<Event> values, bool clear = true)
-		{
-			if (clear)
-			{
-				values.Clear();
-				Catagory = Event.EventCatagories.Count;
-				Event.EventCatagories.Add(name.ToString());
-			}
-			else
-			{
-				Catagory = Event.EventCatagories.IndexOf(name.ToString());
-			}
 
 
-			Values = values;
-			SeriesGroup = seriesGroup;
-		}
-	}
+
 
 
 
@@ -171,39 +98,7 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 		//Fill events
 
-		var g = GenerateEventSeriesGroup();
 
-		g.AddEventGroup(EventCatagory.Referral, ReferralValues).
-			 AddEvent("Date On Referral", new(Referral.DateOnReferral), 0).
-			 AddEvent("Date Referral Received", new(Referral.DateReferralReceived), .5).
-			 AddEvent("Active Management", Referral.DateOfActiveManagement, 1);
-
-
-		g.AddEventGroup(EventCatagory.Contact, ContactValues).
-			AddEvent("Needed", Referral.DateOfActiveManagement, 0).
-			AddEvent("Contact Attempted", Referral.ContactAttempted, .5).
-			AddEvent("Contact Made", Referral.DateContactMade, 1);
-
-		if (Referral.PreviousCorrespondenceNeeded == true)
-			g.AddEventGroup(EventCatagory.Correspondence, CorrispondanceValues).
-				AddEvent("Needed", Referral.DateOfActiveManagement, 0).
-				AddEvent("Previous Correspondence Requested",
-					Referral.PreviousCorrespondenceRequested, .5).
-				AddEvent("Previous Correspondence Received",
-					Referral.PreviousCorrespondenceReceived, 1);
-		else CorrispondanceValues.Clear();
-
-
-
-		g.AddTest(MRIValues, Referral.DateOfActiveManagement, Referral.MRI, EventCatagory.MRI);
-		g.AddTest(EPValues, Referral.DateOfActiveManagement, Referral.EP, EventCatagory.EP);
-		g.AddTest(LPValues, Referral.DateOfActiveManagement, Referral.LP, EventCatagory.LP);
-		g.AddTest(BloodsValues, Referral.DateOfActiveManagement, Referral.Bloods, EventCatagory.Bloods);
-
-
-		g.AddEventGroup(EventCatagory.Referral, AppointmentValues, false).
-			AddEvent("Medical Appointment", Referral.MedicalAppointment, enabled: Referral.MedicalAppointmentNeeded == true).
-			AddEvent("Nursing Appointment", Referral.NursingAppointment, enabled: Referral.NursingAppointmentNeeded == true);
 
 		//XAxis.MinValue = g.Min;
 		//XAxis.MaxValue = g.Max;
@@ -215,25 +110,9 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 		MainVault = v;
 		//This determines the order of the keys
-		ReferralsEventsCollection = LiveChartsExtensions.GenerateSeries().
-			AddStepLine(ReferralValues, "Referral").
-			AddStepLine(ContactValues, "Contact").
-			AddStepLine(CorrispondanceValues, "Correspondence").
-			AddStepLine(MRIValues, "MRI").
-			AddStepLine(EPValues, "EP").
-			AddStepLine(LPValues, "LP").
-			AddStepLine(BloodsValues, "Bloods").
-			AddSeries<ScatterSeries, Event>(AppointmentValues, "Appointments");
 
 
-
-		//Map event codes to levels on the graph, with progress scores
-		var eventMapper = Mappers.Xy<Event>()
-			.X(value => value.Date.Date!.Value.Ticks)
-			.Y(value => value.Catagory + value.Progress);
-		//lets save the mapper globally
-		Charting.For<Event>(eventMapper);
-		Loaded += new RoutedEventHandler(PatientView_Loaded);
+		Loaded += PatientView_Loaded;
 		void TestChanged(object? sender, PropertyChangedEventArgs? e)
 		{
 			void AddSummary(string? summary) { if (summary != null) Notifications.Add(summary); }
@@ -242,6 +121,13 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 			AddSummary(Referral.EPSummary);
 			AddSummary(Referral.LPSummary);
 			AddSummary(Referral.BloodsSummary);
+
+			if (sender != null)
+			{
+				ClearGantt();
+
+				CreateData();
+			}
 		}
 
 		Referral.MRI.AddListener(TestChanged);
@@ -254,10 +140,91 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 		Debug.WriteLine(Referral.Name);
 		Debug.WriteLine(Notifications);
 
+		DataContext = this;
+
 
 		InitializeComponent();
 
 
+
+		CreateData();
+	}
+	private void ClearGantt()
+	{
+		ganttControl.ClearGantt();
+	}
+
+	private void CreateData()
+	{
+		DateTime mostMinDate = DateTime.Today.AddYears(-100);
+
+
+		DateTime minDate = DateTime.Compare(Referral.DateReferralReceived, mostMinDate) > 0 ? Referral.DateReferralReceived : mostMinDate;
+		DateTime maxDate = DateTime.Today;
+
+		Debug.WriteLine(minDate.ToShortDateString(), maxDate.ToShortDateString());
+
+		//Set max and min dates
+		ganttControl.Initialize(minDate, maxDate);
+
+		// Create timelines and define how they should be presented
+		ganttControl.CreateTimeLine(new PeriodYearSplitter(minDate, maxDate), FormatYear);
+		var gridLineTimeLine = ganttControl.CreateTimeLine(new PeriodMonthSplitter(minDate, maxDate), FormatMonth);
+
+
+
+		// Set the timeline to atatch gridlines to
+		//ganttControl.SetGridLinesTimeline(gridLineTimeLine, DetermineBackground);
+
+		// Create and data
+
+		var rowgroup = ganttControl.CreateGanttRowGroup("Tests");
+
+
+
+		AddTestToGantt(rowgroup, Referral.MRI);
+		AddTestToGantt(rowgroup, Referral.LP);
+		AddTestToGantt(rowgroup, Referral.EP);
+		AddTestToGantt(rowgroup, Referral.Bloods);
+
+
+	}
+
+
+
+	void AddTestToGantt(GanttRowGroup rowgroup, Test test)
+	{
+		if (test.Needed is true)
+		{
+			var testRow = ganttControl.CreateGanttRow(rowgroup, test.Name);
+			if (test.RequestedDate.Date is DateTime req)
+
+				ganttControl.AddGanttTask(testRow, new GanttTask()
+				{
+					Start = req,
+					End = test.TestDate.Date ?? DateTime.Today,
+					Name = $"Awaiting {test.Name} Test"
+				});
+
+			if (test.TestDate.Date is DateTime testDate)
+
+				ganttControl.AddGanttTask(testRow, new GanttTask()
+				{
+					Start = testDate,
+					End = test.ReportedDate.Date ?? DateTime.Today,
+					Name = $"Awaiting {test.Name} Results"
+				});
+		}
+	}
+
+	private string FormatYear(Period period)
+	{
+		return period.Start.Year.ToString();
+	}
+
+	private string FormatMonth(Period period)
+	{
+		return period.Start.Month.ToString();
 	}
 
 	private void PatientView_Loaded(object sender, RoutedEventArgs e)
@@ -373,15 +340,6 @@ public partial class PatientView : UserControl, INotifyPropertyChanged, ITrackab
 
 	}
 
-	public void OnEventClicked(object sender, ChartPoint p)
-	{
-
-		//  FocusManager.SetFocusedElement(ReferralStack, CorrespondenceRequested.CommentControl);
-
-
-
-		// Debug.WriteLine(((Event)p.Instance).Name);
-	}
 	public bool Archived
 	{
 		get => Referral.Archived;

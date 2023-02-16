@@ -31,14 +31,14 @@ public partial class GanttControl : UserControl
 	private TimeLine? gridLineTimeLine;
 	private double selectionStartX;
 	private readonly ObservableCollection<TimeLine> gridLineTimeLines = new();
-	public event EventHandler SelectedItemChanged;
-	public event EventHandler<PeriodEventArgs> GanttRowAreaSelected;
+	public event EventHandler? SelectedItemChanged;
+	public event EventHandler<PeriodEventArgs>? GanttRowAreaSelected;
 
 	public delegate string PeriodNameFormatter(Period period);
 	public delegate Brush BackgroundFormatter(TimeLineItem timeLineItem);
 
-	public ObservableCollection<ContextMenuItem> GanttTaskContextMenuItems { get; set; }
-	public ObservableCollection<SelectionContextMenuItem> SelectionContextMenuItems { get; set; }
+	public ObservableCollection<ContextMenuItem>? GanttTaskContextMenuItems { get; set; }
+	public ObservableCollection<SelectionContextMenuItem>? SelectionContextMenuItems { get; set; }
 	public ObservableCollection<TimeLine>? GridLineTimeLine { get { return gridLineTimeLines; } }
 	public SelectionMode TaskSelectionMode { get; set; }
 	public List<GanttTask> SelectedItems
@@ -156,7 +156,7 @@ public partial class GanttControl : UserControl
 
 	public GanttRow CreateGanttRow(GanttRowGroup rowGroup, string name)
 	{
-		var rowHeader = new GanttRowHeader() { Name = name };
+		var rowHeader = new GanttRowHeader(name);
 		var row = new GanttRow() { RowHeader = rowHeader, Tasks = new ObservableCollection<GanttTask>() };
 		rowGroup.Rows.Add(row);
 		return row;

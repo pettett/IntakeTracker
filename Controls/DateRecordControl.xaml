@@ -3,8 +3,12 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:local="clr-namespace:IntakeTrackerApp.Controls" mc:Ignorable="d" d:DesignHeight="50" d:DesignWidth="200">
-	<Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:DateRecordControl}}">
+	xmlns:local="clr-namespace:IntakeTrackerApp.Controls" 
+	xmlns:data="clr-namespace:IntakeTrackerApp.DataManagement" 
+			 mc:Ignorable="d" d:DesignHeight="50" d:DesignWidth="200"
+			
+			 >
+	<Grid x:Name="ControlGrid" d:DataContext="{d:DesignInstance Type=local:DateRecordControl}" >
 		<Grid.RowDefinitions>
 			<RowDefinition />
 			<RowDefinition/>
@@ -15,9 +19,10 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<local:TodayDateControl x:Name="DateControl" SelectedDate="{Binding SelectedDate}" Grid.ColumnSpan="2"  />
-		<Image Grid.Row="1" Margin="0,8,4,0" Width="16" Height="16" Source="/Images/CommentFilled_16x.png" VerticalAlignment="Top"/>
-        <TextBox x:Name="CommentControl" Grid.Column="1" Margin="0,8,0,0" Grid.Row="1" 
-                 TextWrapping="Wrap" AcceptsReturn="true" Text="{Binding Comment,UpdateSourceTrigger=PropertyChanged}"/>
+		<local:TodayDateControl x:Name="DateControl" SelectedDate="{Binding DateRecord.Date, Mode=TwoWay}" Grid.ColumnSpan="2"  />
+		<Image Grid.Row="1" Margin="0,4,4,0" Width="16" Height="16" Source="/Images/CommentFilled_16x.png" VerticalAlignment="Top"/>
+        <TextBox x:Name="CommentControl" Grid.Column="1" Margin="0,4,0,0" Grid.Row="1" 
+                 TextWrapping="Wrap" AcceptsReturn="true" 
+				 Text="{Binding DateRecord.Comment, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 	</Grid>
 </UserControl>
